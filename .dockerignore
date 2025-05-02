@@ -1,0 +1,29 @@
+# Go build artifacts
+*.out
+*.exe
+*.test
+*.log
+
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+
+# Cache & vendor
+vendor/
+go.work
+go.work.sum
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# Node (если вдруг фронт рядом)
+node_modules/
+dist/
+
+# DO NOT ignore go.mod/go.sum
+# DO NOT ignore /docs/

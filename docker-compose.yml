@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: emelya
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: emelya_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - emelya-net
+
+  redis:
+    image: redis:7
+    restart: always
+    networks:
+      - emelya-net
+
+  app:
+    build:
+      context: .
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://emelya:secret@db:5432/emelya_db
+      REDIS_ADDR: redis:6379
+      SMS_API_KEY: ${SMS_API_KEY}
+      SMS_SENDER_NAME: ${SMS_SENDER_NAME}
+    networks:
+      - emelya-net
+    # ❌ volumes убраны, чтобы не затирать /app
+
+volumes:
+  pg_data:
+
+networks:
+  emelya-net:

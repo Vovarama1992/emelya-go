@@ -1,0 +1,39 @@
+# Бинарники Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Кэш, временные файлы, IDE
+*.log
+*.tmp
+*.swp
+*.DS_Store
+.idea/
+.vscode/
+*.code-workspace
+
+.migrate
+
+# Go-модули и кэш
+vendor/
+go.work
+go.work.sum
+
+# Docker
+*.env
+.env.*
+docker-compose.override.yml
+
+# Билд/выходные директории
+bin/
+dist/
+build/
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+desktop.ini
