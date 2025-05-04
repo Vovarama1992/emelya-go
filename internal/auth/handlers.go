@@ -149,9 +149,11 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		log.Println("[DEBUG] Использован тестовый код 1111 — подтверждение выполнено принудительно")
 		_ = h.authService.VerifyPhone(ctx, user.ID)
 		password, _ := h.authService.GetPasswordFromRedis(ctx, req.Phone)
+		token, _ := GenerateToken(user.ID)
 		json.NewEncoder(w).Encode(map[string]string{
 			"login":    user.Login,
 			"password": password,
+			"token":    token,
 		})
 		return
 	}
@@ -175,12 +177,18 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.authService.SendLoginAndPasswordBySms(user.Phone, user.Login, password); err != nil {
 		log.Println("[RedSMS: ОШИБКА] Не удалось отправить логин и пароль по SMS:", err)
-		// не прерываем, просто логируем
+	}
+
+	token, err := GenerateToken(user.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
+		return
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"login":    user.Login,
 		"password": password,
+		"token":    token,
 	})
 }
 
