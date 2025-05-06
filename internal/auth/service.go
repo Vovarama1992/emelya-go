@@ -1,17 +1,10 @@
 package auth
 
 import (
-	"bytes"
 	"context"
-	"crypto/md5"
 	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"math/big"
-	"net/http"
 	"os"
 	"time"
 
@@ -73,114 +66,6 @@ func (s *AuthService) SavePasswordToRedis(ctx context.Context, phone string, pas
 func (s *AuthService) GetPasswordFromRedis(ctx context.Context, phone string) (string, error) {
 	key := fmt.Sprintf("auth_password:phone:%s", phone)
 	return s.redisClient.Get(ctx, key).Result()
-}
-
-func (s *AuthService) SendCodeBySms(phone string, code string) error {
-	login := os.Getenv("SMS_LOGIN")
-	apiKey := os.Getenv("SMS_API_KEY")
-	sender := os.Getenv("SMS_SENDER_NAME")
-
-	text := fmt.Sprintf("Код подтверждения: %s. Emelia Invest", code)
-
-	// Генерация ts и secret
-	ts := fmt.Sprintf("%d", time.Now().Unix())
-	secretData := ts + apiKey
-	hash := md5.Sum([]byte(secretData))
-	secret := hex.EncodeToString(hash[:])
-
-	// Формируем JSON-пейлоад
-	payload := map[string]interface{}{
-		"route": "sms",
-		"from":  sender,
-		"to":    phone,
-		"text":  text,
-	}
-	body, _ := json.Marshal(payload)
-
-	log.Println("=== [RedSMS: ОТПРАВКА КОДА] ===")
-	log.Printf("Телефон      : %s", phone)
-	log.Printf("Текст        : %s", text)
-	log.Printf("Логин        : %s", login)
-	log.Printf("TS           : %s", ts)
-	log.Printf("Secret (md5) : %s", secret)
-	log.Printf("Отправитель  : %s", sender)
-
-	req, err := http.NewRequest("POST", "https://cp.redsms.ru/api/message", bytes.NewBuffer(body))
-	if err != nil {
-		log.Println("[RedSMS: ОШИБКА] Не удалось создать запрос:", err)
-		return fmt.Errorf("ошибка создания запроса: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("login", login)
-	req.Header.Set("ts", ts)
-	req.Header.Set("secret", secret)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("[RedSMS: ОШИБКА] Запрос не отправлен:", err)
-		return fmt.Errorf("ошибка отправки запроса: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, _ := io.ReadAll(resp.Body)
-
-	log.Printf("HTTP статус : %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
-	log.Printf("Ответ сервера: %s", respBody)
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("ошибка ответа RedSMS: %s", string(respBody))
-	}
-
-	log.Println("[RedSMS: УСПЕХ] Код успешно отправлен.")
-	return nil
-}
-
-func (s *AuthService) SendLoginAndPasswordBySms(phone string, login string, password string) error {
-	sender := os.Getenv("SMS_SENDER_NAME")
-	loginEnv := os.Getenv("SMS_LOGIN")
-	apiKey := os.Getenv("SMS_API_KEY")
-
-	text := fmt.Sprintf("Логин: %s\nПароль: %s\nEmelia Invest", login, password)
-
-	ts := fmt.Sprintf("%d", time.Now().Unix())
-	secretData := ts + apiKey
-	hash := md5.Sum([]byte(secretData))
-	secret := hex.EncodeToString(hash[:])
-
-	payload := map[string]interface{}{
-		"route": "sms",
-		"from":  sender,
-		"to":    phone,
-		"text":  text,
-	}
-	body, _ := json.Marshal(payload)
-
-	req, err := http.NewRequest("POST", "https://cp.redsms.ru/api/message", bytes.NewBuffer(body))
-	if err != nil {
-		return fmt.Errorf("ошибка создания запроса: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("login", loginEnv)
-	req.Header.Set("ts", ts)
-	req.Header.Set("secret", secret)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("ошибка отправки запроса: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("ошибка ответа RedSMS: %s", string(respBody))
-	}
-
-	log.Println("[RedSMS] Логин и пароль успешно отправлены по SMS.")
-	return nil
 }
 
 func ParseToken(tokenStr string) (int, error) {

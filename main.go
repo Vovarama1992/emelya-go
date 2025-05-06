@@ -15,6 +15,7 @@ import (
 	"github.com/Vovarama1992/emelya-go/docs"
 	"github.com/Vovarama1992/emelya-go/internal/auth"
 	"github.com/Vovarama1992/emelya-go/internal/db"
+	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	"github.com/Vovarama1992/emelya-go/internal/user"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -23,7 +24,6 @@ import (
 )
 
 func main() {
-	// Настройка Swagger
 	docs.SwaggerInfo.Host = "emelia-invest.com"
 	docs.SwaggerInfo.Schemes = []string{"https"}
 	docs.SwaggerInfo.BasePath = ""
@@ -44,12 +44,13 @@ func main() {
 	defer redisClient.Close()
 
 	userRepo := user.NewPostgresRepository(dbConn)
+	notifierService := notifier.NewNotifier()
 	authService := auth.NewAuthService(userRepo, redisClient)
-	authHandler := auth.NewHandler(authService)
+	authHandler := auth.NewHandler(authService, notifierService)
+	notifyHandler := notifier.NewNotifyHandler(notifierService)
 
 	mux := http.NewServeMux()
 
-	// Пинг
 	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
 	})
@@ -62,12 +63,14 @@ func main() {
 	mux.HandleFunc("/api/auth/login-by-creds", authHandler.LoginByCredentials)
 	mux.HandleFunc("/api/auth/me", authHandler.Me)
 
+	// Notifier endpoint
+	mux.HandleFunc("/api/notify", notifyHandler.Notify)
+
 	// Swagger
 	mux.Handle("/api/docs/", httpSwagger.Handler(
 		httpSwagger.URL("/api/docs/doc.json"),
 	))
 
-	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "https://emelia-invest.com"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

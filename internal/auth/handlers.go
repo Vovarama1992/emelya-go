@@ -5,16 +5,18 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	"github.com/Vovarama1992/emelya-go/internal/user"
 	"github.com/Vovarama1992/emelya-go/internal/utils"
 )
 
 type Handler struct {
 	authService *AuthService
+	notifier    *notifier.Notifier
 }
 
-func NewHandler(authService *AuthService) *Handler {
-	return &Handler{authService: authService}
+func NewHandler(authService *AuthService, notifier *notifier.Notifier) *Handler {
+	return &Handler{authService: authService, notifier: notifier}
 }
 
 // ===== Structures for Swagger =====
@@ -106,7 +108,7 @@ func (h *Handler) RequestRegister(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка Redis (пароль)")
 		return
 	}
-	if err := h.authService.SendCodeBySms(newUser.Phone, code); err != nil {
+	if err := h.notifier.SendCodeBySms(newUser.Phone, code); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -175,7 +177,7 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.authService.SendLoginAndPasswordBySms(user.Phone, user.Login, password); err != nil {
+	if err := h.notifier.SendLoginAndPasswordBySms(user.Phone, user.Login, password); err != nil {
 		log.Println("[RedSMS: ОШИБКА] Не удалось отправить логин и пароль по SMS:", err)
 	}
 
@@ -228,7 +230,7 @@ func (h *Handler) RequestLogin(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка Redis")
 		return
 	}
-	if err := h.authService.SendCodeBySms(user.Phone, code); err != nil {
+	if err := h.notifier.SendCodeBySms(user.Phone, code); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
