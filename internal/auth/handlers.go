@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -152,6 +153,7 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		_ = h.authService.VerifyPhone(ctx, user.ID)
 		password, _ := h.authService.GetPasswordFromRedis(ctx, req.Phone)
 		token, _ := GenerateToken(user.ID)
+		_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", fmt.Sprintf("Зарегистрирован новый пользователь:\nИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s", user.FirstName, user.LastName, user.Patronymic, user.Phone, user.Email, user.Login))
 		json.NewEncoder(w).Encode(map[string]string{
 			"login":    user.Login,
 			"password": password,
@@ -180,6 +182,8 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 	if err := h.notifier.SendLoginAndPasswordBySms(user.Phone, user.Login, password); err != nil {
 		log.Println("[RedSMS: ОШИБКА] Не удалось отправить логин и пароль по SMS:", err)
 	}
+
+	_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", fmt.Sprintf("Зарегистрирован новый пользователь:\nИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s", user.FirstName, user.LastName, user.Patronymic, user.Phone, user.Email, user.Login))
 
 	token, err := GenerateToken(user.ID)
 	if err != nil {
@@ -270,14 +274,12 @@ func (h *Handler) ConfirmLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Code == "1111" {
-		log.Println("[DEBUG] Использован тестовый код 1111 — вход разрешён")
-
 		token, err := GenerateToken(user.ID)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 			return
 		}
-
+		_ = h.notifier.SendEmailToOperator("Вход по коду", fmt.Sprintf("Пользователь вошёл по коду:\nТелефон: %s", user.Phone))
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": "Успешный вход (тестовый код)",
 			"token":   token,
@@ -296,6 +298,8 @@ func (h *Handler) ConfirmLogin(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
 	}
+
+	_ = h.notifier.SendEmailToOperator("Вход по коду", fmt.Sprintf("Пользователь вошёл по коду:\nТелефон: %s", user.Phone))
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Успешный вход",
@@ -342,6 +346,8 @@ func (h *Handler) LoginByCredentials(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
 	}
+
+	_ = h.notifier.SendEmailToOperator("Вход по логину", fmt.Sprintf("Пользователь вошёл по логину и паролю:\nЛогин: %s\nТелефон: %s", req.Login, user.Phone))
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Успешный вход",
