@@ -42,6 +42,15 @@ definitions:
         example: "79001112233"
         type: string
     type: object
+  notifier.NotifyRequest:
+    properties:
+      text:
+        example: |-
+          Имя: Иванов Иван
+          Телефон: +7900...
+          Тариф: Премиум
+        type: string
+    type: object
   user.User:
     properties:
       email:
@@ -265,6 +274,41 @@ paths:
       summary: Запрос на регистрацию
       tags:
       - auth
+  /api/notify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Текст уведомления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/notifier.NotifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Отправка произвольного уведомления оператору
+      tags:
+      - notifier
 schemes:
 - https
 swagger: "2.0"

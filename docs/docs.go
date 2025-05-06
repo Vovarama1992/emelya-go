@@ -312,6 +312,60 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/notify": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifier"
+                ],
+                "summary": "Отправка произвольного уведомления оператору",
+                "parameters": [
+                    {
+                        "description": "Текст уведомления",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/notifier.NotifyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -372,6 +426,15 @@ const docTemplate = `{
                 "phone": {
                     "type": "string",
                     "example": "79001112233"
+                }
+            }
+        },
+        "notifier.NotifyRequest": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "example": "Имя: Иванов Иван\nТелефон: +7900...\nТариф: Премиум"
                 }
             }
         },
