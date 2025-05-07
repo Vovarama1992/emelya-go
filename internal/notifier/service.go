@@ -87,20 +87,31 @@ func (n *Notifier) sendSms(phone string, text string) error {
 }
 
 func (n *Notifier) SendEmailToOperator(subject, body string) error {
+	log.Println("[NOTIFIER] Начало отправки email оператору")
+
 	m := gomail.NewMessage()
-	m.SetHeader("From", n.smtpFrom)
-	m.SetHeader("To", "vital80@inbox.ru")
+	from := n.smtpFrom
+	to := []string{"vital80@inbox.ru", "vovayhh9988@gmail.com"}
+
+	m.SetHeader("From", from)
+	m.SetHeader("To", to...)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/plain", body)
+
+	log.Printf("[NOTIFIER] Email параметры:\n  From: %s\n  To: %v\n  Subject: %s\n  Body: %s",
+		from, to, subject, body)
 
 	d := gomail.NewDialer(n.smtpHost, n.smtpPort, n.smtpUser, n.smtpPass)
 	d.SSL = true
 
+	log.Printf("[NOTIFIER] SMTP настройки:\n  Host: %s\n  Port: %d\n  User: %s\n  SSL: %v",
+		n.smtpHost, n.smtpPort, n.smtpUser, d.SSL)
+
 	if err := d.DialAndSend(m); err != nil {
-		log.Printf("[NOTIFIER: EMAIL] ошибка: %v", err)
+		log.Printf("[NOTIFIER: EMAIL] Ошибка отправки: %v", err)
 		return err
 	}
 
-	log.Println("[NOTIFIER] Email отправлен оператору.")
+	log.Println("[NOTIFIER] Email успешно отправлен операторам.")
 	return nil
 }
