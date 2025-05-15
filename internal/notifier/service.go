@@ -90,13 +90,13 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 
 	apiKey := n.smsApiKey
 	from := n.smtpFrom
-	to := []string{"vital80@inbox.ru", "vovayhh9988@gmail.com"}
+	to := "vital80@inbox.ru" // Отправляем на один адрес за раз (RedSMS API не принимает массив)
 
 	type EmailRequest struct {
-		FromEmail string   `json:"from_email"`
-		Subject   string   `json:"subject"`
-		Text      string   `json:"text"`
-		To        []string `json:"to"`
+		FromEmail string `json:"from_email"`
+		Subject   string `json:"subject"`
+		Text      string `json:"text"`
+		To        string `json:"to"`
 	}
 
 	reqBody := EmailRequest{
@@ -112,7 +112,7 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "https://api.msndr.ru/v1/email/messages", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", "https://api.msndr.net/v1/email/messages", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Printf("[NOTIFIER: EMAIL] Ошибка создания запроса: %v", err)
 		return err
