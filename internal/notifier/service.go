@@ -14,26 +14,28 @@ import (
 )
 
 type Notifier struct {
-	smsLogin  string
-	smsApiKey string
-	smsSender string
-	smtpHost  string
-	smtpPort  int
-	smtpUser  string
-	smtpPass  string
-	smtpFrom  string
+	smsLogin    string
+	smsApiKey   string
+	smsSender   string
+	emailApiKey string
+	smtpHost    string
+	smtpPort    int
+	smtpUser    string
+	smtpPass    string
+	smtpFrom    string
 }
 
 func NewNotifier() *Notifier {
 	return &Notifier{
-		smsLogin:  os.Getenv("SMS_LOGIN"),
-		smsApiKey: os.Getenv("SMS_API_KEY"),
-		smsSender: os.Getenv("SMS_SENDER_NAME"),
-		smtpHost:  os.Getenv("SMTP_HOST"),
-		smtpPort:  465,
-		smtpUser:  os.Getenv("SMTP_USER"),
-		smtpPass:  os.Getenv("SMTP_PASS"),
-		smtpFrom:  os.Getenv("SMTP_FROM"),
+		smsLogin:    os.Getenv("SMS_LOGIN"),
+		smsApiKey:   os.Getenv("SMS_API_KEY"),
+		smsSender:   os.Getenv("SMS_SENDER_NAME"),
+		smtpHost:    os.Getenv("SMTP_HOST"),
+		smtpPort:    465,
+		emailApiKey: os.Getenv("EMAIL_API_KEY"),
+		smtpUser:    os.Getenv("SMTP_USER"),
+		smtpPass:    os.Getenv("SMTP_PASS"),
+		smtpFrom:    os.Getenv("SMTP_FROM"),
 	}
 }
 
@@ -88,7 +90,7 @@ func (n *Notifier) sendSms(phone string, text string) error {
 func (n *Notifier) SendEmailToOperator(subject, body string) error {
 	log.Println("[NOTIFIER] Начало отправки email оператору")
 
-	apiKey := n.smsApiKey
+	apiKey := n.emailApiKey
 	from := n.smtpFrom
 	to := "vital80@inbox.ru" // Отправляем на один адрес за раз (RedSMS API не принимает массив)
 
