@@ -6,12 +6,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
-
-	"gopkg.in/gomail.v2"
 )
 
 type Notifier struct {
@@ -89,29 +88,52 @@ func (n *Notifier) sendSms(phone string, text string) error {
 func (n *Notifier) SendEmailToOperator(subject, body string) error {
 	log.Println("[NOTIFIER] Начало отправки email оператору")
 
-	m := gomail.NewMessage()
+	apiKey := n.smsApiKey
 	from := n.smtpFrom
 	to := []string{"vital80@inbox.ru", "vovayhh9988@gmail.com"}
 
-	m.SetHeader("From", from)
-	m.SetHeader("To", to...)
-	m.SetHeader("Subject", subject)
-	m.SetBody("text/plain", body)
+	type EmailRequest struct {
+		FromEmail string   `json:"from_email"`
+		Subject   string   `json:"subject"`
+		Text      string   `json:"text"`
+		To        []string `json:"to"`
+	}
 
-	log.Printf("[NOTIFIER] Email параметры:\n  From: %s\n  To: %v\n  Subject: %s\n  Body: %s",
-		from, to, subject, body)
+	reqBody := EmailRequest{
+		FromEmail: from,
+		Subject:   subject,
+		Text:      body,
+		To:        to,
+	}
 
-	d := gomail.NewDialer(n.smtpHost, n.smtpPort, n.smtpUser, n.smtpPass)
-	d.SSL = true
-
-	log.Printf("[NOTIFIER] SMTP настройки:\n  Host: %s\n  Port: %d\n  User: %s\n  SSL: %v",
-		n.smtpHost, n.smtpPort, n.smtpUser, d.SSL)
-
-	if err := d.DialAndSend(m); err != nil {
-		log.Printf("[NOTIFIER: EMAIL] Ошибка отправки: %v", err)
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		log.Printf("[NOTIFIER: EMAIL] Ошибка маршалинга JSON: %v", err)
 		return err
 	}
 
-	log.Println("[NOTIFIER] Email успешно отправлен операторам.")
+	req, err := http.NewRequest("POST", "https://api.msndr.ru/v1/email/messages", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Printf("[NOTIFIER: EMAIL] Ошибка создания запроса: %v", err)
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("[NOTIFIER: EMAIL] Ошибка отправки запроса: %v", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		log.Printf("[NOTIFIER: EMAIL] Ошибка ответа API: %s", string(bodyBytes))
+		return fmt.Errorf("не удалось отправить email, статус: %s", resp.Status)
+	}
+
+	log.Println("[NOTIFIER] Email успешно отправлен операторам через RedSMS API.")
 	return nil
 }
