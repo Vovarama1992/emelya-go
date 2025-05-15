@@ -92,7 +92,7 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 
 	apiKey := n.emailApiKey
 	from := n.smtpFrom
-	to := "vital80@inbox.ru" // Отправляем на один адрес за раз (RedSMS API не принимает массив)
+	toList := []string{"vital80@inbox.ru", "emelyainvest@gmail.com"}
 
 	type EmailRequest struct {
 		FromEmail string `json:"from_email"`
@@ -101,39 +101,41 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 		To        string `json:"to"`
 	}
 
-	reqBody := EmailRequest{
-		FromEmail: from,
-		Subject:   subject,
-		Text:      body,
-		To:        to,
-	}
-
-	jsonData, err := json.Marshal(reqBody)
-	if err != nil {
-		log.Printf("[NOTIFIER: EMAIL] Ошибка маршалинга JSON: %v", err)
-		return err
-	}
-
-	req, err := http.NewRequest("POST", "https://api.msndr.net/v1/email/messages", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Printf("[NOTIFIER: EMAIL] Ошибка создания запроса: %v", err)
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("[NOTIFIER: EMAIL] Ошибка отправки запроса: %v", err)
-		return err
-	}
-	defer resp.Body.Close()
+	for _, to := range toList {
+		reqBody := EmailRequest{
+			FromEmail: from,
+			Subject:   subject,
+			Text:      body,
+			To:        to,
+		}
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		log.Printf("[NOTIFIER: EMAIL] Ошибка ответа API: %s", string(bodyBytes))
-		return fmt.Errorf("не удалось отправить email, статус: %s", resp.Status)
+		jsonData, err := json.Marshal(reqBody)
+		if err != nil {
+			log.Printf("[NOTIFIER: EMAIL] Ошибка маршалинга JSON: %v", err)
+			return err
+		}
+
+		req, err := http.NewRequest("POST", "https://api.msndr.net/v1/email/messages", bytes.NewBuffer(jsonData))
+		if err != nil {
+			log.Printf("[NOTIFIER: EMAIL] Ошибка создания запроса: %v", err)
+			return err
+		}
+		req.Header.Set("Authorization", "Bearer "+apiKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("[NOTIFIER: EMAIL] Ошибка отправки запроса: %v", err)
+			return err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+			bodyBytes, _ := io.ReadAll(resp.Body)
+			log.Printf("[NOTIFIER: EMAIL] Ошибка ответа API: %s", string(bodyBytes))
+			return fmt.Errorf("не удалось отправить email, статус: %s", resp.Status)
+		}
 	}
 
 	log.Println("[NOTIFIER] Email успешно отправлен операторам через RedSMS API.")
