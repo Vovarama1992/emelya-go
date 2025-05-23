@@ -18,8 +18,11 @@ func NewPostgresRepository(db *db.DB) *PostgresRepository {
 
 func (r *PostgresRepository) CreateUser(ctx context.Context, user *User) error {
 	query := `
-		INSERT INTO users (first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO users (
+			first_name, last_name, patronymic, email, phone,
+			is_email_verified, is_phone_verified, login, password_hash, referrer_id
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id
 	`
 	err := r.DB.Pool.QueryRow(ctx, query,
@@ -32,6 +35,7 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *User) error {
 		user.IsPhoneVerified,
 		user.Login,
 		user.PasswordHash,
+		user.ReferrerID, // может быть nil
 	).Scan(&user.ID)
 
 	return err
@@ -39,7 +43,7 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *User) error {
 
 func (r *PostgresRepository) GetUserByID(ctx context.Context, userID int) (*User, error) {
 	query := `
-		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash
+		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash, referrer_id
 		FROM users
 		WHERE id = $1
 	`
@@ -57,6 +61,7 @@ func (r *PostgresRepository) GetUserByID(ctx context.Context, userID int) (*User
 		&user.IsPhoneVerified,
 		&user.Login,
 		&user.PasswordHash,
+		&user.ReferrerID,
 	)
 	if err != nil {
 		return nil, err

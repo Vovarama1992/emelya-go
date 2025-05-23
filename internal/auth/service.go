@@ -36,6 +36,10 @@ func (s *AuthService) RegisterUser(ctx context.Context, newUser *user.User) erro
 	return s.userRepo.CreateUser(ctx, newUser)
 }
 
+func (s *AuthService) FindUserByID(ctx context.Context, userID int) (*user.User, error) {
+	return s.userRepo.GetUserByID(ctx, userID)
+}
+
 func (s *AuthService) FindUserByPhone(ctx context.Context, phone string) (*user.User, error) {
 	return s.userRepo.GetUserByPhone(ctx, phone)
 }
