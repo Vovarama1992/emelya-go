@@ -150,38 +150,6 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Code == "1111" {
-		log.Println("[DEBUG] Использован тестовый код 1111 — подтверждение выполнено принудительно")
-		_ = h.authService.VerifyPhone(ctx, user.ID)
-		password, _ := h.authService.GetPasswordFromRedis(ctx, req.Phone)
-		token, _ := GenerateToken(user.ID)
-
-		refText := "Зарегистрирован новый пользователь:\n"
-		if user.ReferrerID != nil {
-			if refUser, err := h.authService.FindUserByID(ctx, *user.ReferrerID); err == nil && refUser != nil {
-				refText = fmt.Sprintf(
-					"Зарегистрирован новый пользователь по реферальной ссылке от %s %s (%s):\nСсылка: https://emelia-invest.ru/%d\n",
-					refUser.FirstName, refUser.LastName, refUser.Email, refUser.ID,
-				)
-			}
-		}
-
-		body := fmt.Sprintf("%sИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s",
-			refText,
-			user.FirstName, user.LastName, user.Patronymic,
-			user.Phone, user.Email, user.Login,
-		)
-
-		_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", body)
-
-		json.NewEncoder(w).Encode(map[string]string{
-			"login":    user.Login,
-			"password": password,
-			"token":    token,
-		})
-		return
-	}
-
 	storedCode, err := h.authService.GetCodeFromRedis(ctx, req.Phone)
 	if err != nil || storedCode != req.Code {
 		respondWithError(w, http.StatusBadRequest, "Неверный или истекший код")
@@ -219,6 +187,7 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		user.Phone, user.Email, user.Login,
 	)
 
+	log.Printf("[DEBUG] Письмо оператору: Тема: Подтверждение регистрации, Тело:\n%s", body)
 	_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", body)
 
 	token, err := GenerateToken(user.ID)
