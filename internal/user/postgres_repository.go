@@ -72,7 +72,7 @@ func (r *PostgresRepository) GetUserByID(ctx context.Context, userID int) (*User
 
 func (r *PostgresRepository) GetUserByPhone(ctx context.Context, phone string) (*User, error) {
 	query := `
-		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash
+		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash, referrer_id
 		FROM users
 		WHERE phone = $1
 	`
@@ -90,6 +90,7 @@ func (r *PostgresRepository) GetUserByPhone(ctx context.Context, phone string) (
 		&user.IsPhoneVerified,
 		&user.Login,
 		&user.PasswordHash,
+		&user.ReferrerID, // вот эта строка нужна
 	)
 	if err != nil {
 		return nil, err
