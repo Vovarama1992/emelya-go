@@ -119,16 +119,6 @@ func (h *Handler) RequestRegister(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Код отправлен на телефон"})
 }
 
-// ConfirmRegister godoc
-// @Summary Подтверждение регистрации
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param data body ConfirmRequest true "Телефон и код"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/auth/confirm-register [post]
 func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		respondWithError(w, http.StatusMethodNotAllowed, "Метод не разрешён")
@@ -142,8 +132,8 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Phone = utils.NormalizePhone(req.Phone)
-
 	ctx := r.Context()
+
 	user, err := h.authService.FindUserByPhone(ctx, req.Phone)
 	if err != nil || user == nil {
 		respondWithError(w, http.StatusBadRequest, "Пользователь не найден")
@@ -171,23 +161,36 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 		log.Println("[RedSMS: ОШИБКА] Не удалось отправить логин и пароль по SMS:", err)
 	}
 
-	refText := "Зарегистрирован новый пользователь:\n"
-	if user.ReferrerID != nil {
-		if refUser, err := h.authService.FindUserByID(ctx, *user.ReferrerID); err == nil && refUser != nil {
-			refText = fmt.Sprintf(
-				"Зарегистрирован новый пользователь по реферальной ссылке от %s %s (%s):\nСсылка: https://emelia-invest.ru/%d\n",
-				refUser.FirstName, refUser.LastName, refUser.Email, refUser.ID,
+	log.Println("[DEBUG] Подтверждение регистрации — начинаем формирование письма оператору")
+	refText := "Письмо о подтверждении регистрации:\n"
+
+	if user.ReferrerID == nil {
+		log.Println("[DEBUG] У пользователя нет реферера — формируем стандартное письмо")
+		refText += "Зарегистрирован новый пользователь без реферальной ссылки.\n"
+	} else {
+		log.Printf("[DEBUG] У пользователя есть реферер (ID: %d) — ищем данные...", *user.ReferrerID)
+		refUser, err := h.authService.FindUserByID(ctx, *user.ReferrerID)
+		if err != nil || refUser == nil {
+			log.Println("[DEBUG] Не удалось получить данные реферера — формируем письмо без него")
+			refText += "Зарегистрирован новый пользователь (реферер указан, но не найден).\n"
+		} else {
+			log.Printf("[DEBUG] Найден реферер: %s %s (%s)", refUser.FirstName, refUser.LastName, refUser.Email)
+			refText += fmt.Sprintf(
+				"Зарегистрирован новый пользователь по реферальной ссылке от %s %s (%s).\n",
+				refUser.FirstName, refUser.LastName, refUser.Email,
 			)
 		}
 	}
 
-	body := fmt.Sprintf("%sИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s",
+	body := fmt.Sprintf(
+		"%sСсылка на профиль: https://emelia-invest.ru/%d\nИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s",
 		refText,
+		user.ID,
 		user.FirstName, user.LastName, user.Patronymic,
 		user.Phone, user.Email, user.Login,
 	)
 
-	log.Printf("[DEBUG] Письмо оператору: Тема: Подтверждение регистрации, Тело:\n%s", body)
+	log.Printf("[DEBUG] Финальное письмо оператору:\n%s", body)
 	_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", body)
 
 	token, err := GenerateToken(user.ID)
