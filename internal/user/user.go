@@ -11,5 +11,6 @@ type User struct {
 	IsPhoneVerified bool
 	Login           string
 	PasswordHash    string
-	ReferrerID      *int // ссылка на другого пользователя, может быть nil
+	ReferrerID      *int
+	CardNumber      *string // ← вот это
 }
