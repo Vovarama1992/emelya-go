@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN card_number VARCHAR(20);

@@ -146,3 +146,9 @@ func (r *PostgresRepository) SetPhoneVerified(ctx context.Context, userID int) e
 	_, err := r.DB.Pool.Exec(ctx, query, userID)
 	return err
 }
+
+func (r *PostgresRepository) UpdateProfile(ctx context.Context, userID int, cardNumber string) error {
+	query := `UPDATE users SET card_number = $1 WHERE id = $2`
+	_, err := r.DB.Pool.Exec(ctx, query, cardNumber, userID)
+	return err
+}

@@ -9,12 +9,9 @@ import (
 	"time"
 
 	"github.com/Vovarama1992/emelya-go/internal/user"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type AuthService struct {
 	userRepo    user.Repository
@@ -72,25 +69,6 @@ func (s *AuthService) GetPasswordFromRedis(ctx context.Context, phone string) (s
 	return s.redisClient.Get(ctx, key).Result()
 }
 
-func ParseToken(tokenStr string) (int, error) {
-	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("неверный метод подписи")
-		}
-		return jwtSecret, nil
-	})
-	if err != nil || !token.Valid {
-		return 0, fmt.Errorf("некорректный токен")
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || claims["user_id"] == nil {
-		return 0, fmt.Errorf("некорректная нагрузка токена")
-	}
-
-	return int(claims["user_id"].(float64)), nil
-}
-
 const safeCharset = "abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ123456789"
 
 // Логин: только буквы (без o, O), длина 8
@@ -126,13 +104,4 @@ func CheckPasswordHash(password, hash string) bool {
 func GenerateCode() string {
 	num, _ := rand.Int(rand.Reader, big.NewInt(10000))
 	return fmt.Sprintf("%04d", num.Int64())
-}
-
-func GenerateToken(userID int) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
 }

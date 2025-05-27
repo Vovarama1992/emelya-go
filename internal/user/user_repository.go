@@ -9,4 +9,5 @@ type Repository interface {
 	SetEmailVerified(ctx context.Context, userID int) error
 	SetPhoneVerified(ctx context.Context, userID int) error
 	GetUserByID(ctx context.Context, userID int) (*User, error)
+	UpdateProfile(ctx context.Context, userID int, cardNumber string) error // ← добавляем
 }

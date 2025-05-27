@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	"github.com/Vovarama1992/emelya-go/internal/user"
 	"github.com/Vovarama1992/emelya-go/internal/utils"
@@ -193,7 +194,7 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[DEBUG] Финальное письмо оператору:\n%s", body)
 	_ = h.notifier.SendEmailToOperator("Подтверждение регистрации", body)
 
-	token, err := GenerateToken(user.ID)
+	token, err := jwtutil.GenerateToken(user.ID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
@@ -282,7 +283,7 @@ func (h *Handler) ConfirmLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Code == "1111" {
-		token, err := GenerateToken(user.ID)
+		token, err := jwtutil.GenerateToken(user.ID)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 			return
@@ -301,7 +302,7 @@ func (h *Handler) ConfirmLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := GenerateToken(user.ID)
+	token, err := jwtutil.GenerateToken(user.ID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
@@ -349,7 +350,7 @@ func (h *Handler) LoginByCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := GenerateToken(user.ID)
+	token, err := jwtutil.GenerateToken(user.ID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
@@ -378,7 +379,7 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenStr := authHeader[len("Bearer "):]
-	userID, err := ParseToken(tokenStr)
+	userID, err := jwtutil.ParseToken(tokenStr)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Неверный токен")
 		return

@@ -47,6 +47,8 @@ func main() {
 	notifierService := notifier.NewNotifier()
 	authService := auth.NewAuthService(userRepo, redisClient)
 	authHandler := auth.NewHandler(authService, notifierService)
+	userService := user.NewService(userRepo, notifierService)
+	userHandler := user.NewHandler(userService)
 	notifyHandler := notifier.NewNotifyHandler(notifierService)
 
 	mux := http.NewServeMux()
@@ -65,6 +67,8 @@ func main() {
 
 	// Notifier endpoint
 	mux.HandleFunc("/api/notify", notifyHandler.Notify)
+	mux.HandleFunc("/api/user/update-profile", userHandler.UpdateProfile)
+	mux.HandleFunc("/api/user/request-withdraw", userHandler.RequestWithdraw)
 
 	// Swagger
 	mux.Handle("/api/docs/", httpSwagger.Handler(
