@@ -69,60 +69,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/confirm-register": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Подтверждение регистрации",
-                "parameters": [
-                    {
-                        "description": "Телефон и код",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth.ConfirmRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/auth/login-by-creds": {
             "post": {
                 "consumes": [
@@ -366,6 +312,132 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/user/request-withdraw": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Запрос на вывод средств",
+                "parameters": [
+                    {
+                        "description": "Сумма вывода",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.RequestWithdrawRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/update-profile": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Обновление профиля",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -426,6 +498,9 @@ const docTemplate = `{
                 "phone": {
                     "type": "string",
                     "example": "79001112233"
+                },
+                "referrerId": {
+                    "type": "integer"
                 }
             }
         },
@@ -438,9 +513,31 @@ const docTemplate = `{
                 }
             }
         },
+        "user.RequestWithdrawRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 1500
+                }
+            }
+        },
+        "user.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "card_number": {
+                    "type": "string",
+                    "example": "1234567812345678"
+                }
+            }
+        },
         "user.User": {
             "type": "object",
             "properties": {
+                "cardNumber": {
+                    "description": "← вот это",
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -470,6 +567,9 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                },
+                "referrerID": {
+                    "type": "integer"
                 }
             }
         }

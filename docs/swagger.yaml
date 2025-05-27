@@ -41,6 +41,8 @@ definitions:
       phone:
         example: "79001112233"
         type: string
+      referrerId:
+        type: integer
     type: object
   notifier.NotifyRequest:
     properties:
@@ -51,8 +53,23 @@ definitions:
           Тариф: Премиум
         type: string
     type: object
+  user.RequestWithdrawRequest:
+    properties:
+      amount:
+        example: 1500
+        type: number
+    type: object
+  user.UpdateProfileRequest:
+    properties:
+      card_number:
+        example: "1234567812345678"
+        type: string
+    type: object
   user.User:
     properties:
+      cardNumber:
+        description: ← вот это
+        type: string
       email:
         type: string
       firstName:
@@ -73,6 +90,8 @@ definitions:
         type: string
       phone:
         type: string
+      referrerID:
+        type: integer
     type: object
 host: emelia-invest.com
 info:
@@ -114,41 +133,6 @@ paths:
               type: string
             type: object
       summary: Подтверждение входа
-      tags:
-      - auth
-  /api/auth/confirm-register:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Телефон и код
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/auth.ConfirmRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Подтверждение регистрации
       tags:
       - auth
   /api/auth/login-by-creds:
@@ -309,6 +293,88 @@ paths:
       summary: Отправка произвольного уведомления оператору
       tags:
       - notifier
+  /api/user/request-withdraw:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Сумма вывода
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.RequestWithdrawRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Запрос на вывод средств
+      tags:
+      - user
+  /api/user/update-profile:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновление профиля
+      tags:
+      - user
 schemes:
 - https
 swagger: "2.0"
