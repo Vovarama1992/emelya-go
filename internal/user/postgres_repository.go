@@ -43,7 +43,8 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *User) error {
 
 func (r *PostgresRepository) GetUserByID(ctx context.Context, userID int) (*User, error) {
 	query := `
-		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified, login, password_hash, referrer_id, card_number
+		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified,
+		       is_phone_verified, login, password_hash, referrer_id, card_number, balance
 		FROM users
 		WHERE id = $1
 	`
@@ -63,6 +64,7 @@ func (r *PostgresRepository) GetUserByID(ctx context.Context, userID int) (*User
 		&user.PasswordHash,
 		&user.ReferrerID,
 		&user.CardNumber,
+		&user.Balance,
 	)
 	if err != nil {
 		return nil, err

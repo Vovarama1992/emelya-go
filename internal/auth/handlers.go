@@ -184,7 +184,7 @@ func (h *Handler) ConfirmRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body := fmt.Sprintf(
-		"%sСсылка на профиль: https://emelia-invest.ru/%d\nИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s",
+		"%sСсылка на профиль: https://emelia-invest.com/%d\nИмя: %s %s %s\nТелефон: %s\nEmail: %s\nЛогин: %s",
 		refText,
 		user.ID,
 		user.FirstName, user.LastName, user.Patronymic,

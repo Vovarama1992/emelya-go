@@ -13,4 +13,5 @@ type User struct {
 	PasswordHash    string
 	ReferrerID      *int
 	CardNumber      *string // ← вот это
+	Balance         float64 `json:"balance"`
 }
