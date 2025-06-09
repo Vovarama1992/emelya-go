@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"log"
 
 	"github.com/Vovarama1992/emelya-go/internal/db"
 )
@@ -178,6 +179,7 @@ func (r *PostgresRepository) GetAllUsers(ctx context.Context) ([]User, error) {
 	`
 	rows, err := r.DB.Pool.Query(ctx, query)
 	if err != nil {
+		log.Printf("Ошибка запроса GetAllUsers: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -202,6 +204,7 @@ func (r *PostgresRepository) GetAllUsers(ctx context.Context) ([]User, error) {
 			&user.Tarif,
 		)
 		if err != nil {
+			log.Printf("Ошибка сканирования GetAllUsers: %v", err)
 			return nil, err
 		}
 		users = append(users, user)

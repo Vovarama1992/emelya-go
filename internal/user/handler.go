@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
@@ -104,6 +105,7 @@ func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 
 	users, err := h.service.GetAllUsers(r.Context())
 	if err != nil {
+		log.Printf("Ошибка GetAllUsers: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Не удалось получить пользователей"})
 		return
