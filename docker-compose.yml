@@ -51,6 +51,7 @@ services:
       DB_DATABASE: emelya_db
       DB_USERNAME: emelya
       DB_PASSWORD: secret
+    working_dir: /app
     networks:
       - emelya-net
 
