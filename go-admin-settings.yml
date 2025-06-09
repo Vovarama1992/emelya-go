@@ -6,4 +6,4 @@ system:
   addr: ":8000"
 
 log:
-  path: "/app/logs" # создадим локально
+  path: "/logs" # создадим локально

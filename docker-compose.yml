@@ -43,7 +43,7 @@ services:
       - db
     volumes:
       - ./go-admin-settings.yml:/config/settings.yml:ro
-      - ./logs:/app/logs
+      - ./logs:/logs
     environment:
       DB_DRIVER: pgsql
       DB_HOST: db
@@ -51,7 +51,7 @@ services:
       DB_DATABASE: emelya_db
       DB_USERNAME: emelya
       DB_PASSWORD: secret
-    working_dir: /app
+    working_dir: /
     networks:
       - emelya-net
 
