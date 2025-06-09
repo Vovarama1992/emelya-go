@@ -4,3 +4,6 @@ database:
 
 system:
   addr: ":8000"
+
+log:
+  path: "./logs"  # создадим локально
