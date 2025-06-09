@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   auth.ConfirmRequest:
     properties:
@@ -53,22 +52,30 @@ definitions:
           Тариф: Премиум
         type: string
     type: object
-  user.RequestWithdrawRequest:
-    properties:
-      amount:
-        example: 1500
-        type: number
-    type: object
+  user.TarifType:
+    enum:
+    - Легкий старт
+    - Триумф
+    - Максимум
+    type: string
+    x-enum-varnames:
+    - TarifLegkiyStart
+    - TarifTriumf
+    - TarifMaksimum
   user.UpdateProfileRequest:
     properties:
+      balance:
+        type: number
       card_number:
-        example: "1234567812345678"
         type: string
+      tarif:
+        $ref: '#/definitions/user.TarifType'
     type: object
   user.User:
     properties:
+      balance:
+        type: number
       cardNumber:
-        description: ← вот это
         type: string
       email:
         type: string
@@ -92,13 +99,11 @@ definitions:
         type: string
       referrerID:
         type: integer
+      tarif:
+        $ref: '#/definitions/user.TarifType'
     type: object
-host: emelia-invest.com
 info:
   contact: {}
-  description: API для регистрации и логина
-  title: Emelya API
-  version: "1.0"
 paths:
   /api/auth/confirm-login:
     post:
@@ -293,17 +298,37 @@ paths:
       summary: Отправка произвольного уведомления оператору
       tags:
       - notifier
+  /api/user/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить всех пользователей
+      tags:
+      - user
   /api/user/request-withdraw:
     post:
       consumes:
       - application/json
       parameters:
-      - description: Сумма вывода
+      - description: Обновляемые поля
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/user.RequestWithdrawRequest'
+          $ref: '#/definitions/user.UpdateProfileRequest'
       produces:
       - application/json
       responses:
@@ -375,6 +400,4 @@ paths:
       summary: Обновление профиля
       tags:
       - user
-schemes:
-- https
 swagger: "2.0"

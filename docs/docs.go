@@ -313,6 +313,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/all": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить всех пользователей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/request-withdraw": {
             "post": {
                 "consumes": [
@@ -327,12 +358,12 @@ const docTemplate = `{
                 "summary": "Запрос на вывод средств",
                 "parameters": [
                     {
-                        "description": "Сумма вывода",
+                        "description": "Обновляемые поля",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.RequestWithdrawRequest"
+                            "$ref": "#/definitions/user.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -513,29 +544,40 @@ const docTemplate = `{
                 }
             }
         },
-        "user.RequestWithdrawRequest": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number",
-                    "example": 1500
-                }
-            }
+        "user.TarifType": {
+            "type": "string",
+            "enum": [
+                "Легкий старт",
+                "Триумф",
+                "Максимум"
+            ],
+            "x-enum-varnames": [
+                "TarifLegkiyStart",
+                "TarifTriumf",
+                "TarifMaksimum"
+            ]
         },
         "user.UpdateProfileRequest": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "card_number": {
-                    "type": "string",
-                    "example": "1234567812345678"
+                    "type": "string"
+                },
+                "tarif": {
+                    "$ref": "#/definitions/user.TarifType"
                 }
             }
         },
         "user.User": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "cardNumber": {
-                    "description": "← вот это",
                     "type": "string"
                 },
                 "email": {
@@ -570,6 +612,9 @@ const docTemplate = `{
                 },
                 "referrerID": {
                     "type": "integer"
+                },
+                "tarif": {
+                    "$ref": "#/definitions/user.TarifType"
                 }
             }
         }
@@ -578,12 +623,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "emelia-invest.com",
-	BasePath:         "/api",
-	Schemes:          []string{"https"},
-	Title:            "Emelya API",
-	Description:      "API для регистрации и логина",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

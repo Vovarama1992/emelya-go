@@ -1,9 +1,3 @@
-// @title Emelya API
-// @version 1.0
-// @description API для регистрации и логина
-// @host emelia-invest.com
-// @BasePath /api
-// @schemes https
 package main
 
 import (
@@ -24,9 +18,13 @@ import (
 )
 
 func main() {
+	// Настраиваем swagger
+	docs.SwaggerInfo.Title = "Emelya API"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Description = "API для регистрации, логина и управления пользователями"
 	docs.SwaggerInfo.Host = "emelia-invest.com"
+	docs.SwaggerInfo.BasePath = "/api"
 	docs.SwaggerInfo.Schemes = []string{"https"}
-	docs.SwaggerInfo.BasePath = ""
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Ошибка загрузки .env файла")
@@ -67,10 +65,13 @@ func main() {
 
 	// Notifier endpoint
 	mux.HandleFunc("/api/notify", notifyHandler.Notify)
+
+	// User endpoints
 	mux.HandleFunc("/api/user/update-profile", userHandler.UpdateProfile)
 	mux.HandleFunc("/api/user/request-withdraw", userHandler.RequestWithdraw)
+	mux.HandleFunc("/api/user/all", userHandler.GetAllUsers) // добавлен маршрут получения всех пользователей
 
-	// Swagger
+	// Swagger UI
 	mux.Handle("/api/docs/", httpSwagger.Handler(
 		httpSwagger.URL("/api/docs/doc.json"),
 	))

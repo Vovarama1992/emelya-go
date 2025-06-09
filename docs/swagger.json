@@ -1,16 +1,8 @@
 {
-    "schemes": [
-        "https"
-    ],
     "swagger": "2.0",
     "info": {
-        "description": "API для регистрации и логина",
-        "title": "Emelya API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "emelia-invest.com",
-    "basePath": "/api",
     "paths": {
         "/api/auth/confirm-login": {
             "post": {
@@ -310,6 +302,37 @@
                 }
             }
         },
+        "/api/user/all": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить всех пользователей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/request-withdraw": {
             "post": {
                 "consumes": [
@@ -324,12 +347,12 @@
                 "summary": "Запрос на вывод средств",
                 "parameters": [
                     {
-                        "description": "Сумма вывода",
+                        "description": "Обновляемые поля",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.RequestWithdrawRequest"
+                            "$ref": "#/definitions/user.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -510,29 +533,40 @@
                 }
             }
         },
-        "user.RequestWithdrawRequest": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number",
-                    "example": 1500
-                }
-            }
+        "user.TarifType": {
+            "type": "string",
+            "enum": [
+                "Легкий старт",
+                "Триумф",
+                "Максимум"
+            ],
+            "x-enum-varnames": [
+                "TarifLegkiyStart",
+                "TarifTriumf",
+                "TarifMaksimum"
+            ]
         },
         "user.UpdateProfileRequest": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "card_number": {
-                    "type": "string",
-                    "example": "1234567812345678"
+                    "type": "string"
+                },
+                "tarif": {
+                    "$ref": "#/definitions/user.TarifType"
                 }
             }
         },
         "user.User": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "cardNumber": {
-                    "description": "← вот это",
                     "type": "string"
                 },
                 "email": {
@@ -567,6 +601,9 @@
                 },
                 "referrerID": {
                     "type": "integer"
+                },
+                "tarif": {
+                    "$ref": "#/definitions/user.TarifType"
                 }
             }
         }
