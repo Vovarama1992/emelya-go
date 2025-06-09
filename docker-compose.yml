@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
@@ -44,7 +42,15 @@ services:
     depends_on:
       - db
     volumes:
-      - ./go-admin-settings.yml:/config/settings.yml
+      - ./go-admin-settings.yml:/config/settings.yml:ro
+      - ./logs:/app/logs
+    environment:
+      DB_DRIVER: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: emelya_db
+      DB_USERNAME: emelya
+      DB_PASSWORD: secret
     networks:
       - emelya-net
 
