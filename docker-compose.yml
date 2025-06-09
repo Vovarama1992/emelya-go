@@ -37,7 +37,7 @@ services:
       - emelya-net
 
   go-admin:
-    image: goadmin/go-admin:latest
+    image: goadminteam/go-admin:latest
     restart: always
     ports:
       - "8000:8000"
