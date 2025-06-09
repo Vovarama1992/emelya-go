@@ -1,0 +1,6 @@
+database:
+  driver: "pgsql"
+  source: "host=db user=emelya password=secret dbname=emelya_db port=5432 sslmode=disable"
+
+system:
+  addr: ":8000"

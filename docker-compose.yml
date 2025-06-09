@@ -43,13 +43,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      DB_DRIVER: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: emelya_db
-      DB_USERNAME: emelya
-      DB_PASSWORD: secret
+    volumes:
+      - ./go-admin-settings.yml:/config/settings.yml
     networks:
       - emelya-net
 
