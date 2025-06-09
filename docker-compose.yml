@@ -35,7 +35,23 @@ services:
       SMS_SENDER_NAME: ${SMS_SENDER_NAME}
     networks:
       - emelya-net
-    # ❌ volumes убраны, чтобы не затирать /app
+
+  go-admin:
+    image: goadmin/go-admin:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_DRIVER: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: emelya_db
+      DB_USERNAME: emelya
+      DB_PASSWORD: secret
+    networks:
+      - emelya-net
 
 volumes:
   pg_data:
