@@ -36,7 +36,6 @@ services:
 
   go-admin:
     image: goadminteam/go-admin:latest
-    restart: always
     ports:
       - "8000:8000"
     depends_on:
