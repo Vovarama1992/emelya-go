@@ -92,7 +92,7 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 
 	apiKey := n.emailApiKey
 	from := n.smtpFrom
-	toList := []string{"vital80@inbox.ru", "emelyainvest@gmail.com", "emelya.tech@mail.ru"}
+	toList := []string{"vital80@inbox.ru", "emelyainvest@gmail.com", "vovayhh9988@gmail.com", "emelya.tech@mail.ru"}
 
 	type EmailRequest struct {
 		FromEmail string `json:"from_email"`
