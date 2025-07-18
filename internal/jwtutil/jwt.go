@@ -10,7 +10,7 @@ import (
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-func ParseToken(tokenStr string) (int, error) {
+func ParseToken(tokenStr string) (int64, error) {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("неверный метод подписи")
@@ -26,12 +26,13 @@ func ParseToken(tokenStr string) (int, error) {
 		return 0, fmt.Errorf("некорректная нагрузка токена")
 	}
 
-	return int(claims["user_id"].(float64)), nil
+	return int64(claims["user_id"].(float64)), nil
 }
 
-func GenerateToken(userID int) (string, error) {
+func GenerateToken(userID int64, email string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"email":   email,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

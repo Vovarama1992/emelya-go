@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS deposits;
+DROP TYPE IF EXISTS deposit_status;
+DROP TYPE IF EXISTS tariftype;

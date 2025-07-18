@@ -1,2 +1,0 @@
-ALTER TABLE users
-ADD COLUMN balance numeric(12, 2) NOT NULL DEFAULT 0;

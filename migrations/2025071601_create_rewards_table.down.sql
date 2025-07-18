@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS rewards;
+DROP TYPE IF EXISTS reward_type;
