@@ -1,3 +1,6 @@
+include .env
+export
+
 SWAGGER_OUT_DIR=./docs
 SWAGGER_MAIN_FILE=./cmd/main.go
 
