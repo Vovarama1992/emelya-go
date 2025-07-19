@@ -1,14 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/Vovarama1992/emelya-go/docs"
-	"github.com/robfig/cron/v3"
+	"github.com/Vovarama1992/emelya-go/internal/scheduler"
 
 	authadapter "github.com/Vovarama1992/emelya-go/internal/auth/delivery"
 	authusecase "github.com/Vovarama1992/emelya-go/internal/auth/usecase"
@@ -81,17 +80,7 @@ func main() {
 	operationService := usecase.NewOperationsService(depositService, rewardService, withdrawalService)
 
 	// CRON для начисления наград по депозитам (каждый час)
-	cronScheduler := cron.New()
-	_, err = cronScheduler.AddFunc("@hourly", func() {
-		fmt.Println("[CRON] Начисляю rewards через cron...")
-		if err := depositService.AccrueDailyRewardsForAllDeposits(context.Background()); err != nil {
-			fmt.Printf("[CRON] Ошибка начисления: %v\n", err)
-		}
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	cronScheduler.Start()
+	cronScheduler := scheduler.StartDepositRewardCron(depositService)
 	defer cronScheduler.Stop()
 
 	// HTTP Handlers

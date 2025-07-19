@@ -7,10 +7,15 @@ import (
 	"strconv"
 
 	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
+	operation "github.com/Vovarama1992/emelya-go/internal/money/operation_model"
 	ports "github.com/Vovarama1992/emelya-go/internal/money/ports"
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
+	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 	user "github.com/Vovarama1992/emelya-go/internal/user/ports"
 )
+
+var _ = model.User{}
+var _ = operation.Operations{}
 
 type Handler struct {
 	userService       user.UserServiceInterface
@@ -98,7 +103,7 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 // @Summary Получить всех пользователей
 // @Tags user
 // @Produce json
-// @Success 200 {array} models.User
+// @Success 200 {array} model.User
 // @Failure 500 {object} map[string]string
 // @Router /api/admin/user/all [get]
 func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +128,7 @@ func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 // @Tags admin-user
 // @Produce json
 // @Param user_id query int true "ID пользователя"
-// @Success 200 {object} money_usecase.Operations
+// @Success 200 {object} operation.Operations
 // @Failure 400,500 {object} map[string]string
 // @Router /api/admin/user/operations [get]
 func (h *Handler) GetUserOperations(w http.ResponseWriter, r *http.Request) {

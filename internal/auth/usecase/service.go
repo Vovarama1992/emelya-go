@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
-	models "github.com/Vovarama1992/emelya-go/internal/user/models"
+	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 	ports "github.com/Vovarama1992/emelya-go/internal/user/ports"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
@@ -33,19 +33,19 @@ func NewAuthService(userService ports.UserServiceInterface, redisClient *redis.C
 	}
 }
 
-func (s *AuthService) RegisterUser(ctx context.Context, newUser *models.User) error {
+func (s *AuthService) RegisterUser(ctx context.Context, newUser *model.User) error {
 	return s.UserService.CreateUser(ctx, newUser)
 }
 
-func (s *AuthService) FindUserByID(ctx context.Context, userID int64) (*models.User, error) {
+func (s *AuthService) FindUserByID(ctx context.Context, userID int64) (*model.User, error) {
 	return s.UserService.FindUserByID(ctx, userID)
 }
 
-func (s *AuthService) FindUserByPhone(ctx context.Context, phone string) (*models.User, error) {
+func (s *AuthService) FindUserByPhone(ctx context.Context, phone string) (*model.User, error) {
 	return s.UserService.FindUserByPhone(ctx, phone)
 }
 
-func (s *AuthService) FindUserByLogin(ctx context.Context, login string) (*models.User, error) {
+func (s *AuthService) FindUserByLogin(ctx context.Context, login string) (*model.User, error) {
 	return s.UserService.FindUserByLogin(ctx, login)
 }
 

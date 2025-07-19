@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/Vovarama1992/emelya-go/internal/db"
-	model "github.com/Vovarama1992/emelya-go/internal/user/models"
+	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 )
 
 type UserRepository struct {

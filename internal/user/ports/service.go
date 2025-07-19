@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	user "github.com/Vovarama1992/emelya-go/internal/user/models"
+	user "github.com/Vovarama1992/emelya-go/internal/user/model"
 )
 
 type UserServiceInterface interface {

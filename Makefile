@@ -8,3 +8,9 @@ swagger:
 
 tidy:
 	go mod tidy
+
+refresh:
+	git pull origin master && \
+	docker-compose build --no-cache && \
+	docker-compose up -d && \
+	docker-compose exec app ./migrate -path ./migrations -database $$DATABASE_URL up

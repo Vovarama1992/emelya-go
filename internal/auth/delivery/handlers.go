@@ -9,7 +9,7 @@ import (
 	usecase "github.com/Vovarama1992/emelya-go/internal/auth/usecase"
 	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
-	models "github.com/Vovarama1992/emelya-go/internal/user/models"
+	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 	"github.com/Vovarama1992/emelya-go/internal/utils"
 	"github.com/go-playground/validator/v10"
 )
@@ -71,7 +71,7 @@ func (h *Handler) RequestRegister(w http.ResponseWriter, r *http.Request) {
 		v := int64(*req.ReferrerID)
 		referrerID = &v
 	}
-	newUser := &models.User{
+	newUser := &model.User{
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		Patronymic:      req.Patronymic,
@@ -366,7 +366,7 @@ func (h *Handler) LoginByCredentials(w http.ResponseWriter, r *http.Request) {
 // @Summary Получение текущего пользователя
 // @Tags auth
 // @Produce json
-// @Success 200 {object} models.User
+// @Success 200 {object} model.User
 // @Failure 401 {object} map[string]string
 // @Router /api/auth/me [get]
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {

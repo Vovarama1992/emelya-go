@@ -1,0 +1,1160 @@
+definitions:
+  github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Deposit:
+    properties:
+      amount:
+        type: number
+      approved_at:
+        type: string
+      block_until:
+        type: string
+      created_at:
+        type: string
+      daily_reward:
+        type: number
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Status'
+      tarif:
+        $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.TarifType'
+      user_id:
+        type: integer
+    type: object
+  github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Status:
+    enum:
+    - pending
+    - approved
+    - closed
+    type: string
+    x-enum-comments:
+      StatusApproved: активный
+      StatusClosed: закрыт, разблокирован
+      StatusPending: ожидает подтверждения
+    x-enum-varnames:
+    - StatusPending
+    - StatusApproved
+    - StatusClosed
+  github_com_Vovarama1992_emelya-go_internal_money_deposit_model.TarifType:
+    enum:
+    - Легкий старт
+    - Триумф
+    - Максимум
+    type: string
+    x-enum-varnames:
+    - TarifLegkiyStart
+    - TarifTriumf
+    - TarifMaksimum
+  github_com_Vovarama1992_emelya-go_internal_money_operation_model.Operations:
+    properties:
+      deposits:
+        items:
+          $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Deposit'
+        type: array
+      rewards:
+        items:
+          $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_reward_model.Reward'
+        type: array
+      withdrawals:
+        items:
+          $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.Withdrawal'
+        type: array
+    type: object
+  github_com_Vovarama1992_emelya-go_internal_money_reward_model.Reward:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      deposit_id:
+        type: integer
+      id:
+        type: integer
+      last_accrued_at:
+        type: string
+      type:
+        $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_reward_model.RewardType'
+      user_id:
+        type: integer
+      withdrawn:
+        type: number
+    type: object
+  github_com_Vovarama1992_emelya-go_internal_money_reward_model.RewardType:
+    enum:
+    - deposit
+    - referral
+    type: string
+    x-enum-varnames:
+    - RewardTypeDeposit
+    - RewardTypeReferral
+  github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.Withdrawal:
+    properties:
+      amount:
+        type: number
+      approved_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      reason:
+        type: string
+      rejected_at:
+        type: string
+      reward_id:
+        type: integer
+      status:
+        $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.WithdrawalStatus'
+      user_id:
+        type: integer
+    type: object
+  github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.WithdrawalStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - WithdrawalStatusPending
+    - WithdrawalStatusApproved
+    - WithdrawalStatusRejected
+  github_com_Vovarama1992_emelya-go_internal_user_model.User:
+    properties:
+      balance:
+        type: number
+      cardNumber:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      isEmailVerified:
+        type: boolean
+      isPhoneVerified:
+        type: boolean
+      lastName:
+        type: string
+      login:
+        type: string
+      passwordHash:
+        type: string
+      patronymic:
+        type: string
+      phone:
+        type: string
+      referrerID:
+        type: integer
+      role:
+        $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_user_model.UserRole'
+    type: object
+  github_com_Vovarama1992_emelya-go_internal_user_model.UserRole:
+    enum:
+    - user
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleUser
+    - RoleAdmin
+  internal_auth_delivery.ConfirmRequest:
+    properties:
+      code:
+        type: string
+      phone:
+        type: string
+    required:
+    - code
+    - phone
+    type: object
+  internal_auth_delivery.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  internal_auth_delivery.PhoneRequest:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  internal_auth_delivery.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        maxLength: 50
+        type: string
+      last_name:
+        maxLength: 50
+        type: string
+      patronymic:
+        maxLength: 50
+        type: string
+      phone:
+        type: string
+      referrerId:
+        type: integer
+    required:
+    - email
+    - first_name
+    - last_name
+    - phone
+    type: object
+  internal_money_deposit_delivery.AdminCreateDepositRequest:
+    properties:
+      amount:
+        type: number
+      approved_at:
+        type: string
+      block_until:
+        type: string
+      created_at:
+        type: string
+      daily_reward:
+        type: number
+      tarif:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - amount
+    - approved_at
+    - block_until
+    - created_at
+    - daily_reward
+    - tarif
+    - user_id
+    type: object
+  internal_money_deposit_delivery.DepositCreateRequest:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  internal_money_reward_delivery.AdminCreateReferralRewardRequest:
+    properties:
+      amount:
+        type: number
+      user_id:
+        type: integer
+    required:
+    - amount
+    - user_id
+    type: object
+  internal_money_withdrawal_delivery.AdminApproveWithdrawalRequest:
+    properties:
+      withdrawal_id:
+        type: integer
+    required:
+    - withdrawal_id
+    type: object
+  internal_money_withdrawal_delivery.AdminRejectWithdrawalRequest:
+    properties:
+      reason:
+        type: string
+      withdrawal_id:
+        type: integer
+    required:
+    - reason
+    - withdrawal_id
+    type: object
+  internal_money_withdrawal_delivery.CreateWithdrawalRequest:
+    properties:
+      amount:
+        type: number
+      reward_id:
+        type: integer
+    required:
+    - amount
+    - reward_id
+    type: object
+  internal_notifier.NotifyRequest:
+    properties:
+      text:
+        example: |-
+          Имя: Иванов Иван
+          Телефон: +7900...
+          Тариф: Премиум
+        type: string
+    type: object
+  internal_user_http.UpdateProfileRequest:
+    properties:
+      balance:
+        type: number
+      card_number:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/admin/deposit/approve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID депозита
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Дата одобрения в формате RFC3339
+        in: query
+        name: approved_at
+        required: true
+        type: string
+      - description: Дата блокировки в формате RFC3339
+        in: query
+        name: block_until
+        required: true
+        type: string
+      - description: Дневная награда
+        in: query
+        name: daily_reward
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Одобрить депозит
+      tags:
+      - deposit
+  /api/admin/deposit/by-user:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить все депозиты по user_id (только для админа)
+      tags:
+      - deposit
+  /api/admin/deposit/close:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID депозита
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Закрыть депозит
+      tags:
+      - deposit
+  /api/admin/deposit/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID инвестора
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Данные депозита
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_deposit_delivery.AdminCreateDepositRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: создать депозит вручную'
+      tags:
+      - admin-deposit
+  /api/admin/deposit/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID депозита
+        in: query
+        name: deposit_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: удалить депозит (ручное удаление)'
+      tags:
+      - admin-deposit
+  /api/admin/deposit/get:
+    get:
+      parameters:
+      - description: ID депозита
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить депозит по ID
+      tags:
+      - deposit
+  /api/admin/deposit/pending:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: получить все депозиты в статусе pending'
+      tags:
+      - admin-deposit
+  /api/admin/reward/by-user:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: получить все награды пользователя'
+      tags:
+      - admin-reward
+  /api/admin/reward/referral-income:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные о вознаграждении
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_reward_delivery.AdminCreateReferralRewardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: начислить доход от реферала'
+      tags:
+      - admin-reward
+  /api/admin/user/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_user_model.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить всех пользователей
+      tags:
+      - user
+  /api/admin/user/operations:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_money_operation_model.Operations'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: все операции пользователя (депозиты, выводы, награды)'
+      tags:
+      - admin-user
+  /api/admin/withdrawal/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: все заявки на вывод'
+      tags:
+      - admin-withdrawal
+  /api/admin/withdrawal/approve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID заявки
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_withdrawal_delivery.AdminApproveWithdrawalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: подтвердить заявку на вывод'
+      tags:
+      - admin-withdrawal
+  /api/admin/withdrawal/pending:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: заявки на вывод в статусе pending'
+      tags:
+      - admin-withdrawal
+  /api/admin/withdrawal/reject:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID заявки и причина
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_withdrawal_delivery.AdminRejectWithdrawalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: отклонить заявку на вывод'
+      tags:
+      - admin-withdrawal
+  /api/auth/confirm-login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Телефон и код
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth_delivery.ConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Подтверждение входа
+      tags:
+      - auth
+  /api/auth/login-by-creds:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth_delivery.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Вход по логину и паролю
+      tags:
+      - auth
+  /api/auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Vovarama1992_emelya-go_internal_user_model.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получение текущего пользователя
+      tags:
+      - auth
+  /api/auth/request-login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Телефон
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth_delivery.PhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Запрос входа по телефону
+      tags:
+      - auth
+  /api/auth/request-register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth_delivery.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Запрос на регистрацию
+      tags:
+      - auth
+  /api/deposit/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Сумма депозита
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_deposit_delivery.DepositCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать заявку на депозит
+      tags:
+      - deposit
+  /api/deposit/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить все депозиты пользователя
+      tags:
+      - deposit
+  /api/notify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Текст уведомления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_notifier.NotifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Отправка произвольного уведомления оператору
+      tags:
+      - notifier
+  /api/reward/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Юзер: получить свои вознаграждения'
+      tags:
+      - reward
+  /api/user/update-profile:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_user_http.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновление профиля
+      tags:
+      - user
+  /api/withdrawal/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items: {}
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Юзер: получить свои заявки на вывод'
+      tags:
+      - withdrawal
+  /api/withdrawal/request:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные заявки на вывод
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_money_withdrawal_delivery.CreateWithdrawalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Юзер: создать заявку на вывод'
+      tags:
+      - withdrawal
+swagger: "2.0"

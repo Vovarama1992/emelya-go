@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
-	models "github.com/Vovarama1992/emelya-go/internal/user/models"
+	models "github.com/Vovarama1992/emelya-go/internal/user/model"
 	ports "github.com/Vovarama1992/emelya-go/internal/user/ports"
 )
 
