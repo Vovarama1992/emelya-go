@@ -13,10 +13,10 @@ tidy:
 	go mod tidy
 
 refresh:
-	git pull origin master && \
-	docker-compose build --no-cache && \
-	docker-compose up -d && \
-	until docker-compose exec db pg_isready -U emelya; do sleep 1; done && \
+	git pull origin master
+	docker-compose build app
+	docker-compose up -d app db redis pgadmin
+	until docker-compose exec db pg_isready -U emelya; do sleep 1; done
 	docker-compose exec app migrate -path ./migrations -database $$DATABASE_URL up
 
 print:
