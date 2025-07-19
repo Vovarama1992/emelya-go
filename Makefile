@@ -17,3 +17,6 @@ refresh:
 	docker-compose build --no-cache && \
 	docker-compose up -d && \
 	docker-compose exec app migrate -path ./migrations -database $$DATABASE_URL up
+
+print:
+	echo $$DATABASE_URL
