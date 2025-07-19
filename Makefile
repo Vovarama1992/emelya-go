@@ -13,4 +13,4 @@ refresh:
 	git pull origin master && \
 	docker-compose build --no-cache && \
 	docker-compose up -d && \
-	docker-compose exec app ./migrate -path ./migrations -database $$DATABASE_URL up
+	docker-compose exec app migrate -path ./migrations -database $DATABASE_URL up
