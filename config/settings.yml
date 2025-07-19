@@ -1,0 +1,17 @@
+db:
+  driver: pgsql
+  host: db
+  port: 5432
+  database: emelya_db
+  username: emelya
+  password: secret
+
+system:
+  host: 0.0.0.0
+  port: 8000
+  env: local
+
+jwt:
+  secret: "secret"
+  timeout: 3600
+  issuer: "go-admin"
