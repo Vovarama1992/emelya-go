@@ -17,7 +17,7 @@ refresh:
 	docker-compose build app
 	docker-compose up -d app db redis pgadmin
 	until docker-compose exec db pg_isready -U emelya; do sleep 1; done
-	docker-compose exec app migrate -path ./migrations -database $$DATABASE_URL up
-
+	sleep 1
+	until docker-compose exec app migrate -path ./migrations -database $$DATABASE_URL up; do sleep 1; done
 print:
 	echo $$DATABASE_URL
