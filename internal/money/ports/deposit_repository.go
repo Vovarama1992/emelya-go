@@ -17,4 +17,5 @@ type DepositRepository interface {
 	FindAllApproved(ctx context.Context) ([]*models.Deposit, error)
 	CreateApproved(ctx context.Context, d *models.Deposit) error
 	Delete(ctx context.Context, id int64) error
+	GetTotalApprovedAmount(ctx context.Context) (float64, error)
 }

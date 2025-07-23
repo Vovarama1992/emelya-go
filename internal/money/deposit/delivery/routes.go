@@ -59,4 +59,6 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService ports.User
 	mux.Handle("/api/admin/deposit/pending",
 		withRecover(withAdminAuth(http.HandlerFunc(handler.ListPendingDeposits))),
 	)
+
+	mux.Handle("/api/admin/deposit/total-approved-amount", http.HandlerFunc(handler.GetTotalApprovedAmount))
 }

@@ -13,7 +13,7 @@ type UserRepository interface {
 	SetEmailVerified(ctx context.Context, userID int64) error
 	SetPhoneVerified(ctx context.Context, userID int64) error
 	FindUserByID(ctx context.Context, userID int64) (*model.User, error)
-	UpdateBalance(ctx context.Context, userID int64, balance float64) error
-	UpdateCardNumber(ctx context.Context, userID int64, cardNumber string) error
+	UpdateProfile(ctx context.Context, user *model.User) error
+	SetReferrer(ctx context.Context, userID int64, referrerID int64) error
 	GetAllUsers(ctx context.Context) ([]model.User, error)
 }

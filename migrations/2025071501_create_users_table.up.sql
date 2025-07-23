@@ -13,7 +13,6 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     referrer_id INT REFERENCES users(id) ON DELETE SET NULL,
     card_number TEXT,
-    balance NUMERIC(12, 2) DEFAULT 0,
     role user_role NOT NULL DEFAULT 'user',
     created_at TIMESTAMPTZ DEFAULT now()
 );

@@ -5,11 +5,10 @@ type DepositCreateRequest struct {
 }
 
 type AdminCreateDepositRequest struct {
-	UserID      int64   `json:"user_id" validate:"required"`
-	Amount      float64 `json:"amount" validate:"required"`
-	Tarif       string  `json:"tarif" validate:"required"`
-	CreatedAt   string  `json:"created_at" validate:"required"`
-	ApprovedAt  string  `json:"approved_at" validate:"required"`
-	BlockUntil  string  `json:"block_until" validate:"required"`
-	DailyReward float64 `json:"daily_reward" validate:"required"`
+	Amount      float64  `json:"amount" validate:"required"`
+	CreatedAt   string   `json:"created_at" validate:"required"`
+	ApprovedAt  string   `json:"approved_at,omitempty"`
+	BlockUntil  string   `json:"block_until,omitempty"`
+	DailyReward *float64 `json:"daily_reward,omitempty"`
+	TariffID    *int64   `json:"tariff_id,omitempty"`
 }

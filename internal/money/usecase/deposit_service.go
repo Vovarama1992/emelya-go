@@ -22,6 +22,7 @@ var (
 type DepositService struct {
 	repo      ports.DepositRepository
 	rewardSvc ports.RewardService
+	tarifSvc  ports.TariffService
 	notifier  notifier.NotifierInterface
 	db        *db.DB
 }
@@ -29,12 +30,14 @@ type DepositService struct {
 func NewDepositService(
 	repo ports.DepositRepository,
 	rewardSvc ports.RewardService,
+	tarifSvc ports.TariffService,
 	db *db.DB,
 	notifier *notifier.Notifier,
 ) *DepositService {
 	return &DepositService{
 		repo:      repo,
 		rewardSvc: rewardSvc,
+		tarifSvc:  tarifSvc,
 		db:        db,
 		notifier:  notifier,
 	}
@@ -66,8 +69,14 @@ func (s *DepositService) CreateDeposit(ctx context.Context, userID int64, amount
 	return nil
 }
 
-// ApproveDeposit — одобряет депозит и создаёт ревард в рамках транзакции
-func (s *DepositService) ApproveDeposit(ctx context.Context, depositID int64, approvedAt, blockUntil time.Time, dailyReward float64) (err error) {
+func (s *DepositService) ApproveDeposit(
+	ctx context.Context,
+	depositID int64,
+	approvedAt time.Time,
+	blockUntil *time.Time,
+	dailyReward *float64,
+	tariffID *int64,
+) (err error) {
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -88,7 +97,23 @@ func (s *DepositService) ApproveDeposit(ctx context.Context, depositID int64, ap
 		return ErrDepositNotFound
 	}
 
-	err = txDepositRepo.Approve(ctx, depositID, approvedAt, blockUntil, dailyReward)
+	if (blockUntil == nil || dailyReward == nil) && tariffID == nil {
+		return errors.New("либо передайте blockUntil/dailyReward, либо tariffID")
+	}
+
+	if tariffID != nil {
+		tariff, err := s.tarifSvc.FindByID(ctx, *tariffID)
+		if err != nil {
+			return fmt.Errorf("не удалось найти тариф: %w", err)
+		}
+		if tariff.BlockUntil == nil || tariff.DailyReward == nil {
+			return fmt.Errorf("у тарифа нет необходимых полей blockUntil или dailyReward")
+		}
+		blockUntil = tariff.BlockUntil
+		dailyReward = tariff.DailyReward
+	}
+
+	err = txDepositRepo.Approve(ctx, depositID, approvedAt, *blockUntil, *dailyReward)
 	if err != nil {
 		return err
 	}
@@ -96,7 +121,7 @@ func (s *DepositService) ApproveDeposit(ctx context.Context, depositID int64, ap
 	reward := &reward_model.Reward{
 		UserID:    deposit.UserID,
 		DepositID: &deposit.ID,
-		Type:      "deposit", // или лучше сделать константу
+		Type:      "deposit",
 		Amount:    deposit.Amount,
 		Withdrawn: 0,
 		CreatedAt: time.Now(),
@@ -154,21 +179,65 @@ func (s *DepositService) CreateDepositByAdmin(
 	createdAt time.Time,
 	approvedAt *time.Time,
 	blockUntil *time.Time,
-	tarif model.TarifType,
 	dailyReward *float64,
+	tariffID *int64,
 ) (int64, error) {
+	tx, err := s.db.Pool.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	txDepositRepo := deposit_infra.NewDepositRepositoryWithTx(tx)
+	txRewardRepo := reward_infra.NewRewardRepositoryWithTx(tx)
+
+	if (blockUntil == nil || dailyReward == nil) && tariffID == nil {
+		return 0, errors.New("либо передайте blockUntil/dailyReward, либо tariffID")
+	}
+
+	if tariffID != nil {
+		tariff, err := s.tarifSvc.FindByID(ctx, *tariffID)
+		if err != nil {
+			return 0, fmt.Errorf("не удалось найти тариф: %w", err)
+		}
+		if tariff.BlockUntil == nil || tariff.DailyReward == nil {
+			return 0, fmt.Errorf("у тарифа нет необходимых полей blockUntil или dailyReward")
+		}
+		blockUntil = tariff.BlockUntil
+		dailyReward = tariff.DailyReward
+	}
+
 	deposit := &model.Deposit{
 		UserID:      userID,
 		Amount:      amount,
 		CreatedAt:   createdAt,
 		ApprovedAt:  approvedAt,
 		BlockUntil:  blockUntil,
-		Tarif:       tarif,
 		DailyReward: dailyReward,
 		Status:      model.StatusApproved,
 	}
 
-	err := s.repo.CreateApproved(ctx, deposit)
+	err = txDepositRepo.CreateApproved(ctx, deposit)
+	if err != nil {
+		return 0, err
+	}
+
+	reward := &reward_model.Reward{
+		UserID:    userID,
+		DepositID: &deposit.ID,
+		Type:      "deposit",
+		Amount:    amount,
+		Withdrawn: 0,
+		CreatedAt: time.Now(),
+	}
+
+	err = txRewardRepo.Create(ctx, reward)
 	if err != nil {
 		return 0, err
 	}
@@ -178,4 +247,8 @@ func (s *DepositService) CreateDepositByAdmin(
 
 func (s *DepositService) DeleteDepositByAdmin(ctx context.Context, id int64) error {
 	return s.repo.Delete(ctx, id)
+}
+
+func (s *DepositService) GetTotalApprovedAmount(ctx context.Context) (float64, error) {
+	return s.repo.GetTotalApprovedAmount(ctx)
 }

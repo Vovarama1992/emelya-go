@@ -20,6 +20,5 @@ type User struct {
 	PasswordHash    string
 	ReferrerID      *int64
 	CardNumber      *string
-	Balance         float64  `json:"balance"`
 	Role            UserRole `json:"role"`
 }

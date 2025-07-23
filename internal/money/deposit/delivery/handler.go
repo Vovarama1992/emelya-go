@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Vovarama1992/emelya-go/internal/jwtutil"
-	model "github.com/Vovarama1992/emelya-go/internal/money/deposit/model"
 	service "github.com/Vovarama1992/emelya-go/internal/money/usecase"
 	"github.com/go-playground/validator/v10"
 )
@@ -91,6 +90,7 @@ func (h *Handler) ApproveDeposit(w http.ResponseWriter, r *http.Request) {
 	approvedAtStr := r.URL.Query().Get("approved_at")
 	blockUntilStr := r.URL.Query().Get("block_until")
 	dailyRewardStr := r.URL.Query().Get("daily_reward")
+	tariffIDStr := r.URL.Query().Get("tariff_id")
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
@@ -104,19 +104,37 @@ func (h *Handler) ApproveDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blockUntil, err := time.Parse(time.RFC3339, blockUntilStr)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
-		return
+	var blockUntil *time.Time
+	if blockUntilStr != "" {
+		t, err := time.Parse(time.RFC3339, blockUntilStr)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
+			return
+		}
+		blockUntil = &t
 	}
 
-	dailyReward, err := strconv.ParseFloat(dailyRewardStr, 64)
-	if err != nil || dailyReward <= 0 {
-		respondWithError(w, http.StatusBadRequest, "Некорректный daily_reward")
-		return
+	var dailyReward *float64
+	if dailyRewardStr != "" {
+		v, err := strconv.ParseFloat(dailyRewardStr, 64)
+		if err != nil || v <= 0 {
+			respondWithError(w, http.StatusBadRequest, "Некорректный daily_reward")
+			return
+		}
+		dailyReward = &v
 	}
 
-	if err := h.depositService.ApproveDeposit(r.Context(), id, approvedAt, blockUntil, dailyReward); err != nil {
+	var tariffID *int64
+	if tariffIDStr != "" {
+		v, err := strconv.ParseInt(tariffIDStr, 10, 64)
+		if err != nil || v <= 0 {
+			respondWithError(w, http.StatusBadRequest, "Некорректный tariff_id")
+			return
+		}
+		tariffID = &v
+	}
+
+	if err := h.depositService.ApproveDeposit(r.Context(), id, approvedAt, blockUntil, dailyReward, tariffID); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Не удалось одобрить депозит")
 		return
 	}
@@ -290,15 +308,35 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Некорректный created_at")
 		return
 	}
-	approvedAt, err := time.Parse(time.RFC3339, req.ApprovedAt)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Некорректный approved_at")
-		return
+
+	var approvedAt *time.Time
+	if req.ApprovedAt != "" {
+		t, err := time.Parse(time.RFC3339, req.ApprovedAt)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Некорректный approved_at")
+			return
+		}
+		approvedAt = &t
 	}
-	blockUntil, err := time.Parse(time.RFC3339, req.BlockUntil)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
-		return
+
+	var blockUntil *time.Time
+	if req.BlockUntil != "" {
+		t, err := time.Parse(time.RFC3339, req.BlockUntil)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
+			return
+		}
+		blockUntil = &t
+	}
+
+	var dailyReward *float64
+	if req.DailyReward != nil {
+		dailyReward = req.DailyReward
+	}
+
+	var tariffID *int64
+	if req.TariffID != nil {
+		tariffID = req.TariffID
 	}
 
 	id, err := h.depositService.CreateDepositByAdmin(
@@ -306,10 +344,10 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		userID,
 		req.Amount,
 		createdAt,
-		&approvedAt,
-		&blockUntil,
-		model.TarifType(req.Tarif),
-		&req.DailyReward,
+		approvedAt,
+		blockUntil,
+		dailyReward,
+		tariffID,
 	)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Не удалось создать депозит")
@@ -369,4 +407,26 @@ func (h *Handler) ListPendingDeposits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(deposits)
+}
+
+// GetTotalApprovedAmount godoc
+// @Summary Получить общую сумму одобренных депозитов
+// @Tags admin-deposit
+// @Produce json
+// @Success 200 {object} map[string]float64
+// @Failure 500 {object} map[string]string
+// @Router /api/admin/deposit/total-approved-amount [get]
+func (h *Handler) GetTotalApprovedAmount(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	total, err := h.depositService.GetTotalApprovedAmount(r.Context())
+	if err != nil {
+		http.Error(w, "Failed to get total approved amount", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]float64{"total_approved_amount": total})
 }

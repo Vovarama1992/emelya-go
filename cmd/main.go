@@ -23,6 +23,9 @@ import (
 	withdrawalhttp "github.com/Vovarama1992/emelya-go/internal/money/withdrawal/delivery"
 	withdrawalinfra "github.com/Vovarama1992/emelya-go/internal/money/withdrawal/infra"
 
+	tariffhttp "github.com/Vovarama1992/emelya-go/internal/money/tariff/delivery"
+	tariffinfra "github.com/Vovarama1992/emelya-go/internal/money/tariff/infra"
+
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	notifieradapter "github.com/Vovarama1992/emelya-go/internal/notifier"
 
@@ -73,9 +76,11 @@ func main() {
 	depositRepo := depositinfra.NewDepositRepository(dbConn)
 	rewardRepo := rewardinfra.NewRewardRepository(dbConn)
 	withdrawalRepo := withdrawalinfra.NewWithdrawalRepository(dbConn)
+	tarifRepo := tariffinfra.NewTariffRepository(dbConn)
 
 	rewardService := usecase.NewRewardService(rewardRepo)
-	depositService := usecase.NewDepositService(depositRepo, rewardService, dbConn, notifierService)
+	tariffService := usecase.NewTariffService(tarifRepo)
+	depositService := usecase.NewDepositService(depositRepo, rewardService, tariffService, dbConn, notifierService)
 	withdrawalService := usecase.NewWithdrawalService(withdrawalRepo, rewardService, dbConn, notifierService)
 	operationService := usecase.NewOperationsService(depositService, rewardService, withdrawalService)
 
@@ -89,6 +94,7 @@ func main() {
 	rewardHandler := rewardhttp.NewHandler(rewardService)
 	withdrawalHandler := withdrawalhttp.NewHandler(withdrawalService)
 	notifyHandler := notifieradapter.NewNotifyHandler(notifierService)
+	tarifHandler := tariffhttp.NewHandler(tariffService)
 
 	// HTTP Routes
 	mux := http.NewServeMux()
@@ -103,6 +109,7 @@ func main() {
 	deposithttp.RegisterRoutes(mux, depositHandler, userService)
 	rewardhttp.RegisterRoutes(mux, rewardHandler, userService)
 	withdrawalhttp.RegisterRoutes(mux, withdrawalHandler, userService)
+	tariffhttp.RegisterRoutes(mux, tarifHandler, userService)
 
 	// Swagger UI
 	mux.Handle("/api/docs/", httpSwagger.Handler(

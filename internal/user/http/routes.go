@@ -28,11 +28,22 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports
 	)
 
 	// === ADMIN ===
+	mux.Handle("/api/admin/user/search-id",
+		withRecover(withAdminAuth(http.HandlerFunc(handler.AdminSearchByID))),
+	)
 	mux.Handle("/api/admin/user/all",
 		withRecover(withAdminAuth(http.HandlerFunc(handler.GetAllUsers))),
 	)
 
 	mux.Handle("/api/admin/user/operations",
 		withRecover(withAdminAuth(http.HandlerFunc(handler.GetUserOperations))),
+	)
+
+	mux.Handle("/api/admin/user/update-profile",
+		withRecover(withAdminAuth(http.HandlerFunc(handler.AdminUpdateProfile))),
+	)
+
+	mux.Handle("/api/admin/user/add-referal",
+		withRecover(withAdminAuth(http.HandlerFunc(handler.AdminAddReferal))),
 	)
 }
