@@ -17,14 +17,6 @@ func NewService(repo ports.UserRepository, notifier *notifier.Notifier) *Service
 	return &Service{repo: repo, notifier: notifier}
 }
 
-func (s *Service) UpdateCardNumber(ctx context.Context, userID int64, cardNumber string) error {
-	return s.repo.UpdateCardNumber(ctx, userID, cardNumber)
-}
-
-func (s *Service) UpdateBalance(ctx context.Context, userID int64, balance float64) error {
-	return s.repo.UpdateBalance(ctx, userID, balance)
-}
-
 func (s *Service) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	return s.repo.GetAllUsers(ctx)
 }
@@ -47,4 +39,12 @@ func (s *Service) VerifyPhone(ctx context.Context, userID int64) error {
 
 func (s *Service) CreateUser(ctx context.Context, newUser *model.User) error {
 	return s.repo.CreateUser(ctx, newUser)
+}
+
+func (s *Service) UpdateProfile(ctx context.Context, user *model.User) error {
+	return s.repo.UpdateProfile(ctx, user)
+}
+
+func (s *Service) SetReferrer(ctx context.Context, userID int64, referrerID int64) error {
+	return s.repo.SetReferrer(ctx, userID, referrerID)
 }

@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"log"
+	"regexp"
 
 	"github.com/Vovarama1992/emelya-go/internal/db"
 	model "github.com/Vovarama1992/emelya-go/internal/user/model"
@@ -16,6 +17,11 @@ func NewUserRepository(db *db.DB) *UserRepository {
 	return &UserRepository{
 		DB: db,
 	}
+}
+
+func normalizePhone(phone string) string {
+	re := regexp.MustCompile(`\D`)
+	return re.ReplaceAllString(phone, "")
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error {
@@ -44,10 +50,34 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error
 	return err
 }
 
+func (r *UserRepository) UpdateProfile(ctx context.Context, user *model.User) error {
+	query := `
+		UPDATE users
+		SET first_name = $1, last_name = $2, patronymic = $3, phone = $4,
+		    card_number = $5,
+		WHERE id = $6
+	`
+	_, err := r.DB.Pool.Exec(ctx, query,
+		user.FirstName,
+		user.LastName,
+		user.Patronymic,
+		user.Phone,
+		user.CardNumber,
+		user.ID,
+	)
+	return err
+}
+
+func (r *UserRepository) SetReferrer(ctx context.Context, userID int64, referrerID int64) error {
+	query := `UPDATE users SET referrer_id = $1 WHERE id = $2`
+	_, err := r.DB.Pool.Exec(ctx, query, referrerID, userID)
+	return err
+}
+
 func (r *UserRepository) FindUserByID(ctx context.Context, userID int64) (*model.User, error) {
 	query := `
 		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified,
-		       is_phone_verified, login, password_hash, referrer_id, card_number, balance, role
+		       is_phone_verified, login, password_hash, referrer_id, card_number, role
 		FROM users
 		WHERE id = $1
 	`
@@ -67,7 +97,6 @@ func (r *UserRepository) FindUserByID(ctx context.Context, userID int64) (*model
 		&user.PasswordHash,
 		&user.ReferrerID,
 		&user.CardNumber,
-		&user.Balance,
 		&user.Role,
 	)
 	if err != nil {
@@ -78,13 +107,15 @@ func (r *UserRepository) FindUserByID(ctx context.Context, userID int64) (*model
 }
 
 func (r *UserRepository) FindUserByPhone(ctx context.Context, phone string) (*model.User, error) {
+	normalizedPhone := normalizePhone(phone)
+
 	query := `
 		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified, is_phone_verified,
 		       login, password_hash, referrer_id, card_number, role
 		FROM users
-		WHERE phone = $1
+		WHERE regexp_replace(phone, '[^0-9]', '', 'g') = $1
 	`
-	row := r.DB.Pool.QueryRow(ctx, query, phone)
+	row := r.DB.Pool.QueryRow(ctx, query, normalizedPhone)
 
 	var user model.User
 	err := row.Scan(
@@ -160,22 +191,10 @@ func (r *UserRepository) SetPhoneVerified(ctx context.Context, userID int64) err
 	return err
 }
 
-func (r *UserRepository) UpdateBalance(ctx context.Context, userID int64, balance float64) error {
-	query := `UPDATE users SET balance = $1 WHERE id = $2`
-	_, err := r.DB.Pool.Exec(ctx, query, balance, userID)
-	return err
-}
-
-func (r *UserRepository) UpdateCardNumber(ctx context.Context, userID int64, cardNumber string) error {
-	query := `UPDATE users SET card_number = $1 WHERE id = $2`
-	_, err := r.DB.Pool.Exec(ctx, query, cardNumber, userID)
-	return err
-}
-
 func (r *UserRepository) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	query := `
 		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified,
-		       is_phone_verified, login, password_hash, referrer_id, card_number, balance, role
+		       is_phone_verified, login, password_hash, referrer_id, card_number, role
 		FROM users
 	`
 	rows, err := r.DB.Pool.Query(ctx, query)
@@ -201,7 +220,6 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]model.User, error) 
 			&user.PasswordHash,
 			&user.ReferrerID,
 			&user.CardNumber,
-			&user.Balance,
 			&user.Role,
 		)
 		if err != nil {

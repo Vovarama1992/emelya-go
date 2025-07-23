@@ -129,3 +129,25 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
+
+// GetTotalAvailableAmount godoc
+// @Summary Получить общую сумму доступных к выводу средств (агрегация по всем пользователям)
+// @Tags admin-reward
+// @Produce json
+// @Success 200 {object} map[string]float64
+// @Failure 500 {object} map[string]string
+// @Router /api/admin/reward/total-available [get]
+func (h *Handler) GetTotalAvailableAmount(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		respondWithError(w, http.StatusMethodNotAllowed, "Метод не разрешён")
+		return
+	}
+
+	amount, err := h.rewardService.GetTotalAvailableAmount(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Ошибка получения суммы")
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]float64{"total_available_amount": amount})
+}

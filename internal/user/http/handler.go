@@ -12,9 +12,10 @@ import (
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 	user "github.com/Vovarama1992/emelya-go/internal/user/ports"
+
+	"github.com/go-playground/validator/v10"
 )
 
-var _ = model.User{}
 var _ = operation.Operations{}
 
 type Handler struct {
@@ -35,16 +36,7 @@ func NewHandler(
 	}
 }
 
-type UpdateProfileRequest struct {
-	CardNumber *string  `json:"card_number,omitempty"`
-	Balance    *float64 `json:"balance,omitempty"`
-}
-
-type RequestWithdrawRequest struct {
-	Amount float64 `json:"amount" example:"1500"`
-}
-
-// @Summary Обновление профиля
+// @Summary Обновить профиль (самостоятельно)
 // @Tags user
 // @Accept json
 // @Produce json
@@ -53,51 +45,153 @@ type RequestWithdrawRequest struct {
 // @Failure 400,401,500 {object} map[string]string
 // @Router /api/user/update-profile [post]
 func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Метод не разрешён"})
-		return
-	}
-
 	var req UpdateProfileRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Некорректный JSON"})
+		http.Error(w, "Некорректный JSON", http.StatusBadRequest)
+		return
+	}
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		http.Error(w, "Ошибка валидации", http.StatusBadRequest)
 		return
 	}
 
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Токен отсутствует"})
+		http.Error(w, "Отсутствует токен", http.StatusUnauthorized)
 		return
 	}
-
 	tokenStr := authHeader[len("Bearer "):]
 	userID, err := jwtutil.ParseToken(tokenStr)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Неверный токен"})
+		http.Error(w, "Неверный токен", http.StatusUnauthorized)
 		return
 	}
 
-	// обновляем поля если они пришли
-	if req.CardNumber != nil {
-		if err := h.userService.UpdateCardNumber(r.Context(), userID, *req.CardNumber); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Не удалось обновить номер карты"})
-			return
-		}
+	userModel := &model.User{
+		ID: userID,
 	}
-	if req.Balance != nil {
-		if err := h.userService.UpdateBalance(r.Context(), userID, *req.Balance); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Не удалось обновить баланс"})
-			return
-		}
+	if req.FirstName != nil {
+		userModel.FirstName = *req.FirstName
+	}
+	if req.LastName != nil {
+		userModel.LastName = *req.LastName
+	}
+	if req.Patronymic != nil {
+		userModel.Patronymic = *req.Patronymic
+	}
+	if req.Phone != nil {
+		userModel.Phone = *req.Phone
+	}
+	if req.CardNumber != nil {
+		userModel.CardNumber = req.CardNumber
+	}
+
+	if err := h.userService.UpdateProfile(r.Context(), userModel); err != nil {
+		http.Error(w, "Не удалось обновить профиль", http.StatusInternalServerError)
+		return
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "Профиль обновлён"})
+}
+
+// @Summary Админ обновляет профиль пользователя
+// @Tags admin-user
+// @Accept json
+// @Produce json
+// @Param data body AdminUpdateProfileRequest true "Обновляемые поля пользователя"
+// @Success 200 {object} map[string]string
+// @Failure 400,401,500 {object} map[string]string
+// @Router /api/admin/user/update-profile [post]
+func (h *Handler) AdminUpdateProfile(w http.ResponseWriter, r *http.Request) {
+	var req AdminUpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Некорректный JSON", http.StatusBadRequest)
+		return
+	}
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		http.Error(w, "Ошибка валидации", http.StatusBadRequest)
+		return
+	}
+
+	userModel := &model.User{
+		ID: req.UserID,
+	}
+	if req.FirstName != nil {
+		userModel.FirstName = *req.FirstName
+	}
+	if req.LastName != nil {
+		userModel.LastName = *req.LastName
+	}
+	if req.Patronymic != nil {
+		userModel.Patronymic = *req.Patronymic
+	}
+	if req.Phone != nil {
+		userModel.Phone = *req.Phone
+	}
+	if req.CardNumber != nil {
+		userModel.CardNumber = req.CardNumber
+	}
+
+	if err := h.userService.UpdateProfile(r.Context(), userModel); err != nil {
+		http.Error(w, "Не удалось обновить профиль пользователя", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "Профиль обновлён"})
+}
+
+// @Summary Админ добавляет реферала пользователю
+// @Tags admin-user
+// @Accept json
+// @Produce json
+// @Param data body AddReferralRequest true "ID пользователя и ID реферала"
+// @Success 200 {object} map[string]string
+// @Failure 400,401,500 {object} map[string]string
+// @Router /api/admin/user/add-referal [post]
+func (h *Handler) AdminAddReferal(w http.ResponseWriter, r *http.Request) {
+	var req AddReferralRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Некорректный JSON", http.StatusBadRequest)
+		return
+	}
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		http.Error(w, "Ошибка валидации", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.userService.SetReferrer(r.Context(), req.UserID, req.ReferrerID); err != nil {
+		http.Error(w, "Не удалось добавить реферала", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "Реферал добавлен"})
+}
+
+// @Summary Найти пользователя по ID
+// @Tags user
+// @Produce json
+// @Param id query int true "ID пользователя"
+// @Success 200 {object} model.User
+// @Failure 400,404,500 {object} map[string]string
+// @Router /api/admin/user/search-id [get]
+func (h *Handler) AdminSearchByID(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id")
+	userID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || userID <= 0 {
+		http.Error(w, "Некорректный ID", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.userService.FindUserByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "Пользователь не найден", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
 }
 
 // @Summary Получить всех пользователей

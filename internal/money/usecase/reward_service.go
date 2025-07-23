@@ -60,3 +60,7 @@ func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, deposit
 
 	return s.repo.UpdateAmountAndLastAccruedAt(ctx, reward.ID, delta, newAccruedAt)
 }
+
+func (s *RewardService) GetTotalAvailableAmount(ctx context.Context) (float64, error) {
+	return s.repo.GetTotalAvailableAmount(ctx)
+}

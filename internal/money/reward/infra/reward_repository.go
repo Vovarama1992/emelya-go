@@ -143,3 +143,16 @@ func (r *RewardRepository) UpdateAmountAndLastAccruedAt(ctx context.Context, rew
 	_, err := r.querier.Exec(ctx, query, delta, accruedAt, rewardID)
 	return err
 }
+
+func (r *RewardRepository) GetTotalAvailableAmount(ctx context.Context) (float64, error) {
+	query := `
+		SELECT COALESCE(SUM(amount - withdrawn), 0)
+		FROM rewards
+	`
+	var total float64
+	err := r.querier.QueryRow(ctx, query).Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
+}

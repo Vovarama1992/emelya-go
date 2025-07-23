@@ -12,4 +12,5 @@ type RewardService interface {
 	UpdateWithdrawn(ctx context.Context, rewardID int64, delta float64) error
 	FindByUserID(ctx context.Context, userID int64) ([]*model.Reward, error)
 	AccrueDailyRewardForDeposit(ctx context.Context, depositID int64, dailyReward float64) error
+	GetTotalAvailableAmount(ctx context.Context) (float64, error)
 }

@@ -389,6 +389,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/deposit/total-approved-amount": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-deposit"
+                ],
+                "summary": "Получить общую сумму одобренных депозитов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/reward/by-user": {
             "get": {
                 "produces": [
@@ -490,6 +521,282 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/reward/total-available": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-reward"
+                ],
+                "summary": "Получить общую сумму доступных к выводу средств (агрегация по всем пользователям)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/tariffs": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tariff"
+                ],
+                "summary": "Получить все тарифы",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_tariff_model.Tariff"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tariff"
+                ],
+                "summary": "Обновить тариф",
+                "parameters": [
+                    {
+                        "description": "Обновляемые данные тарифа",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_money_tariff_delivery.UpdateTariffRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tariff"
+                ],
+                "summary": "Создать тариф",
+                "parameters": [
+                    {
+                        "description": "Данные тарифа",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_money_tariff_delivery.CreateTariffRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tariff"
+                ],
+                "summary": "Удалить тариф",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID тарифа",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/user/add-referal": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-user"
+                ],
+                "summary": "Админ добавляет реферала пользователю",
+                "parameters": [
+                    {
+                        "description": "ID пользователя и ID реферала",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_user_http.AddReferralRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/user/all": {
             "get": {
                 "produces": [
@@ -548,6 +855,124 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/user/search-id": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Найти пользователя по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_user_model.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/user/update-profile": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-user"
+                ],
+                "summary": "Админ обновляет профиль пользователя",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля пользователя",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_user_http.AdminUpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1181,7 +1606,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Обновление профиля",
+                "summary": "Обновить профиль (самостоятельно)",
                 "parameters": [
                     {
                         "description": "Обновляемые поля",
@@ -1360,9 +1785,6 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Status"
                 },
-                "tarif": {
-                    "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.TarifType"
-                },
                 "user_id": {
                     "type": "integer"
                 }
@@ -1384,19 +1806,6 @@ const docTemplate = `{
                 "StatusPending",
                 "StatusApproved",
                 "StatusClosed"
-            ]
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_deposit_model.TarifType": {
-            "type": "string",
-            "enum": [
-                "Легкий старт",
-                "Триумф",
-                "Максимум"
-            ],
-            "x-enum-varnames": [
-                "TarifLegkiyStart",
-                "TarifTriumf",
-                "TarifMaksimum"
             ]
         },
         "github_com_Vovarama1992_emelya-go_internal_money_operation_model.Operations": {
@@ -1462,6 +1871,26 @@ const docTemplate = `{
                 "RewardTypeReferral"
             ]
         },
+        "github_com_Vovarama1992_emelya-go_internal_money_tariff_model.Tariff": {
+            "type": "object",
+            "properties": {
+                "block_until": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "daily_reward": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.Withdrawal": {
             "type": "object",
             "properties": {
@@ -1510,9 +1939,6 @@ const docTemplate = `{
         "github_com_Vovarama1992_emelya-go_internal_user_model.User": {
             "type": "object",
             "properties": {
-                "balance": {
-                    "type": "number"
-                },
                 "cardNumber": {
                     "type": "string"
                 },
@@ -1643,12 +2069,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "amount",
-                "approved_at",
-                "block_until",
-                "created_at",
-                "daily_reward",
-                "tarif",
-                "user_id"
+                "created_at"
             ],
             "properties": {
                 "amount": {
@@ -1666,10 +2087,7 @@ const docTemplate = `{
                 "daily_reward": {
                     "type": "number"
                 },
-                "tarif": {
-                    "type": "string"
-                },
-                "user_id": {
+                "tariff_id": {
                     "type": "integer"
                 }
             }
@@ -1697,6 +2115,45 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "internal_money_tariff_delivery.CreateTariffRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "block_until": {
+                    "description": "ISO8601 строка или nil",
+                    "type": "string"
+                },
+                "daily_reward": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_money_tariff_delivery.UpdateTariffRequest": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "block_until": {
+                    "type": "string"
+                },
+                "daily_reward": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1750,13 +2207,63 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_user_http.AddReferralRequest": {
+            "type": "object",
+            "required": [
+                "referrer_id",
+                "user_id"
+            ],
+            "properties": {
+                "referrer_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_user_http.AdminUpdateProfileRequest": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "card_number": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_user_http.UpdateProfileRequest": {
             "type": "object",
             "properties": {
-                "balance": {
-                    "type": "number"
-                },
                 "card_number": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }

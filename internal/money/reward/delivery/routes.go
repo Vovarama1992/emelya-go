@@ -35,4 +35,8 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService ports.User
 	mux.Handle("/api/admin/reward/by-user",
 		withRecover(withAdminAuth(http.HandlerFunc(handler.AdminGetRewardsByUser))),
 	)
+
+	mux.Handle("/api/admin/reward/total-available",
+		withRecover(withAdminAuth(http.HandlerFunc(handler.GetTotalAvailableAmount))),
+	)
 }

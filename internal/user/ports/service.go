@@ -12,7 +12,7 @@ type UserServiceInterface interface {
 	FindUserByPhone(ctx context.Context, phone string) (*user.User, error)
 	FindUserByLogin(ctx context.Context, login string) (*user.User, error)
 	VerifyPhone(ctx context.Context, userID int64) error
-	UpdateCardNumber(ctx context.Context, userID int64, cardNumber string) error
-	UpdateBalance(ctx context.Context, userID int64, balance float64) error
+	UpdateProfile(ctx context.Context, user *user.User) error
+	SetReferrer(ctx context.Context, userID int64, referrerID int64) error
 	GetAllUsers(ctx context.Context) ([]user.User, error)
 }

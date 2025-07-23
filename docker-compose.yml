@@ -27,12 +27,8 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      PORT: 8080
-      DATABASE_URL: postgres://emelya:secret@db:5432/emelya_db
-      REDIS_ADDR: redis:6379
-      SMS_API_KEY: ${SMS_API_KEY}
-      SMS_SENDER_NAME: ${SMS_SENDER_NAME}
+    env_file:
+      - .env
     networks:
       - emelya-net
 
