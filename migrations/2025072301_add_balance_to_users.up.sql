@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN balance NUMERIC(12, 2);
