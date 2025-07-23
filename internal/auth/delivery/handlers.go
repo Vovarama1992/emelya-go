@@ -85,7 +85,7 @@ func (h *Handler) RequestRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authService.RegisterUser(ctx, newUser); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Ошибка регистрации")
+		respondWithError(w, http.StatusBadRequest, err.Error()) // Возвращаем реальную ошибку
 		return
 	}
 
