@@ -10,7 +10,6 @@ import (
 )
 
 func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports.UserServiceInterface) {
-
 	withRecoverAndRateLimit := func(h http.Handler) http.Handler {
 		return httputil.RecoverMiddleware(httputil.NewRateLimiter(5, time.Minute)(h))
 	}
@@ -19,8 +18,7 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports
 		return middleware.AuthMiddleware(userService, true)(h)
 	}
 
-	mux.Handle("/api/admin/tariffs", withRecoverAndRateLimit(withAdminAuth(http.HandlerFunc(handler.GetAll))))
-	mux.Handle("/api/admin/tariffs", withRecoverAndRateLimit(withAdminAuth(http.HandlerFunc(handler.Create))))
-	mux.Handle("/api/admin/tariffs", withRecoverAndRateLimit(withAdminAuth(http.HandlerFunc(handler.Update))))
-	mux.Handle("/api/admin/tariffs", withRecoverAndRateLimit(withAdminAuth(http.HandlerFunc(handler.Delete))))
+	mux.Handle("/api/admin/tariffs", withRecoverAndRateLimit(
+		withAdminAuth(http.HandlerFunc(handler.HandleTariffs)),
+	))
 }

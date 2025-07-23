@@ -19,6 +19,21 @@ func NewHandler(service ports.TariffService) *Handler {
 	return &Handler{service: service}
 }
 
+func (h *Handler) HandleTariffs(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.GetAll(w, r)
+	case http.MethodPost:
+		h.Create(w, r)
+	case http.MethodPut:
+		h.Update(w, r)
+	case http.MethodDelete:
+		h.Delete(w, r)
+	default:
+		http.Error(w, "Метод не разрешён", http.StatusMethodNotAllowed)
+	}
+}
+
 // @Summary Получить все тарифы
 // @Tags tariff
 // @Produce json
