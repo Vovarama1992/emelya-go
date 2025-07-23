@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"regexp"
 
@@ -76,13 +77,15 @@ func (r *UserRepository) SetReferrer(ctx context.Context, userID int64, referrer
 func (r *UserRepository) FindUserByID(ctx context.Context, userID int64) (*model.User, error) {
 	query := `
 		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified,
-		       is_phone_verified, login, password_hash, referrer_id, card_number, role
+		       is_phone_verified, login, password_hash, referrer_id, card_number, role, balance
 		FROM users
 		WHERE id = $1
 	`
 	row := r.DB.Pool.QueryRow(ctx, query, userID)
 
 	var user model.User
+	var balance sql.NullFloat64
+
 	err := row.Scan(
 		&user.ID,
 		&user.FirstName,
@@ -97,9 +100,16 @@ func (r *UserRepository) FindUserByID(ctx context.Context, userID int64) (*model
 		&user.ReferrerID,
 		&user.CardNumber,
 		&user.Role,
+		&balance,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if balance.Valid {
+		user.Balance = &balance.Float64
+	} else {
+		user.Balance = nil
 	}
 
 	return &user, nil
