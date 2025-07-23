@@ -28,7 +28,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error
 	query := `
 		INSERT INTO users (
 			first_name, last_name, patronymic, email, phone,
-			is_email_verified, is_phone_verified, login, password_hash, referrer_id, role
+			is_email_verified, is_phone_verified, login, password_hash, referrer_id
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
@@ -43,8 +43,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error
 		user.IsPhoneVerified,
 		user.Login,
 		user.PasswordHash,
-		user.ReferrerID, // может быть nil
-		user.Role,
+		user.ReferrerID,
 	).Scan(&user.ID)
 
 	return err
