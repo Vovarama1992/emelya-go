@@ -30,7 +30,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error
 			first_name, last_name, patronymic, email, phone,
 			is_email_verified, is_phone_verified, login, password_hash, referrer_id
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id
 	`
 	err := r.DB.Pool.QueryRow(ctx, query,
