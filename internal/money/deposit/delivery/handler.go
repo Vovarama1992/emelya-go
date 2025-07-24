@@ -350,7 +350,7 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		tariffID,
 	)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Не удалось создать депозит")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
