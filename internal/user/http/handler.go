@@ -135,7 +135,10 @@ func (h *Handler) AdminUpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.userService.UpdateProfile(r.Context(), userModel); err != nil {
-		http.Error(w, "Не удалось обновить профиль пользователя", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": err.Error(),
+		})
 		return
 	}
 
