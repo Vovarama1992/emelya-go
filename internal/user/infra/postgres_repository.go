@@ -53,8 +53,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error
 func (r *UserRepository) UpdateProfile(ctx context.Context, user *model.User) error {
 	query := `
 		UPDATE users
-		SET first_name = $1, last_name = $2, patronymic = $3, phone = $4,
-		    card_number = $5,
+		SET first_name = $1, last_name = $2, patronymic = $3, phone = $4, card_number = $5
 		WHERE id = $6
 	`
 	_, err := r.DB.Pool.Exec(ctx, query,
