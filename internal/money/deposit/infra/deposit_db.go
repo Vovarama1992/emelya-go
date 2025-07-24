@@ -150,7 +150,7 @@ func (r *DepositRepository) FindPending(ctx context.Context) ([]*model.Deposit, 
 func (r *DepositRepository) CreateApproved(ctx context.Context, d *model.Deposit) error {
 	query := `
 		INSERT INTO deposits (user_id, amount, created_at, approved_at, block_until, daily_reward, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, 'approved')
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
 	`
 	return r.querier.QueryRow(ctx, query,
@@ -160,6 +160,7 @@ func (r *DepositRepository) CreateApproved(ctx context.Context, d *model.Deposit
 		d.ApprovedAt,
 		d.BlockUntil,
 		d.DailyReward,
+		d.Status, // передаём как $7
 	).Scan(&d.ID)
 }
 
