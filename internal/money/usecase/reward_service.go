@@ -7,6 +7,7 @@ import (
 
 	ports "github.com/Vovarama1992/emelya-go/internal/money/ports"
 	model "github.com/Vovarama1992/emelya-go/internal/money/reward/model"
+	"github.com/Vovarama1992/go-utils/ctxutil"
 )
 
 var (
@@ -22,22 +23,32 @@ func NewRewardService(repo ports.RewardRepository) *RewardService {
 }
 
 func (s *RewardService) Create(ctx context.Context, reward *model.Reward) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.Create(ctx, reward)
 }
 
 func (s *RewardService) GetByID(ctx context.Context, id int64) (*model.Reward, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.GetByID(ctx, id)
 }
 
 func (s *RewardService) UpdateWithdrawn(ctx context.Context, rewardID int64, delta float64) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.UpdateWithdrawn(ctx, rewardID, delta)
 }
 
 func (s *RewardService) FindByUserID(ctx context.Context, userID int64) ([]*model.Reward, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.FindByUserID(ctx, userID)
 }
 
 func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, depositID int64, dailyReward float64) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	reward, err := s.repo.FindByDepositID(ctx, depositID)
 	if err != nil {
 		return err
@@ -62,5 +73,7 @@ func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, deposit
 }
 
 func (s *RewardService) GetTotalAvailableAmount(ctx context.Context) (float64, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.GetTotalAvailableAmount(ctx)
 }

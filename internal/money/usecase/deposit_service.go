@@ -13,6 +13,7 @@ import (
 	reward_infra "github.com/Vovarama1992/emelya-go/internal/money/reward/infra"
 	reward_model "github.com/Vovarama1992/emelya-go/internal/money/reward/model"
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
+	"github.com/Vovarama1992/go-utils/ctxutil"
 )
 
 var (
@@ -45,6 +46,9 @@ func NewDepositService(
 
 // CreateDeposit — создаёт заявку на депозит без транзакции
 func (s *DepositService) CreateDeposit(ctx context.Context, userID int64, amount float64) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	deposit := &model.Deposit{
 		UserID: userID,
 		Amount: amount,
@@ -77,6 +81,9 @@ func (s *DepositService) ApproveDeposit(
 	dailyReward *float64,
 	tariffID *int64,
 ) (err error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -136,22 +143,37 @@ func (s *DepositService) ApproveDeposit(
 }
 
 func (s *DepositService) ListPendingDeposits(ctx context.Context) ([]*model.Deposit, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.FindPending(ctx)
 }
 
 func (s *DepositService) GetDepositByID(ctx context.Context, id int64) (*model.Deposit, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.FindByID(ctx, id)
 }
 
 func (s *DepositService) GetDepositsByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.FindByUserID(ctx, userID)
 }
 
 func (s *DepositService) CloseDeposit(ctx context.Context, id int64) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.Close(ctx, id)
 }
 
 func (s *DepositService) AccrueDailyRewardsForAllDeposits(ctx context.Context) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	deposits, err := s.repo.FindAllApproved(ctx)
 	if err != nil {
 		return err
@@ -182,6 +204,9 @@ func (s *DepositService) CreateDepositByAdmin(
 	dailyReward *float64,
 	tariffID *int64,
 ) (int64, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return 0, err
@@ -246,9 +271,15 @@ func (s *DepositService) CreateDepositByAdmin(
 }
 
 func (s *DepositService) DeleteDepositByAdmin(ctx context.Context, id int64) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.Delete(ctx, id)
 }
 
 func (s *DepositService) GetTotalApprovedAmount(ctx context.Context) (float64, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	return s.repo.GetTotalApprovedAmount(ctx)
 }

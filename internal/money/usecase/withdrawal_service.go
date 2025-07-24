@@ -12,6 +12,7 @@ import (
 	withdrawal_infra "github.com/Vovarama1992/emelya-go/internal/money/withdrawal/infra"
 	model "github.com/Vovarama1992/emelya-go/internal/money/withdrawal/model"
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
+	"github.com/Vovarama1992/go-utils/ctxutil"
 )
 
 var (
@@ -61,6 +62,9 @@ func (s *WithdrawalService) CreateWithdrawal(ctx context.Context, userID, reward
 		CreatedAt: time.Now(),
 	}
 
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
 	if err := s.repo.Create(ctx, withdrawal); err != nil {
 		return err
 	}
@@ -82,6 +86,8 @@ func (s *WithdrawalService) CreateWithdrawal(ctx context.Context, userID, reward
 
 // Подтверждение заявки с обновлением награды в транзакции
 func (s *WithdrawalService) ApproveWithdrawal(ctx context.Context, withdrawalID int64) (err error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 4)
+	defer cancel()
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -135,6 +141,8 @@ func (s *WithdrawalService) ApproveWithdrawal(ctx context.Context, withdrawalID 
 
 // Отклонение заявки на вывод
 func (s *WithdrawalService) RejectWithdrawal(ctx context.Context, withdrawalID int64, reason string) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 3)
+	defer cancel()
 	withdrawal, err := s.repo.GetByID(ctx, withdrawalID)
 	if err != nil {
 		return ErrNotFound
@@ -154,15 +162,21 @@ func (s *WithdrawalService) RejectWithdrawal(ctx context.Context, withdrawalID i
 
 // Список заявок конкретного пользователя
 func (s *WithdrawalService) ListWithdrawalsByUser(ctx context.Context, userID int64) ([]*model.Withdrawal, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.FindByUserID(ctx, userID)
 }
 
 // Список всех заявок (для админки)
 func (s *WithdrawalService) ListAllWithdrawals(ctx context.Context) ([]*model.Withdrawal, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.FindAll(ctx)
 }
 
 // Список всех заявок в статусе pending
 func (s *WithdrawalService) ListPendingWithdrawals(ctx context.Context) ([]*model.Withdrawal, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.repo.FindAllPendings(ctx)
 }

@@ -3,7 +3,7 @@ module github.com/Vovarama1992/emelya-go
 go 1.23.0
 
 require (
-	github.com/Vovarama1992/go-utils v0.0.0-20250714105211-8783c4a14fe0
+	github.com/Vovarama1992/go-utils v0.0.0-20250724110426-34d015d6bdfd
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/jackc/pgx/v5 v5.7.5

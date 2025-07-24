@@ -11,6 +11,7 @@ import (
 	"github.com/Vovarama1992/emelya-go/internal/notifier"
 	model "github.com/Vovarama1992/emelya-go/internal/user/model"
 	ports "github.com/Vovarama1992/emelya-go/internal/user/ports"
+	"github.com/Vovarama1992/go-utils/ctxutil"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,6 +35,8 @@ func NewAuthService(userService ports.UserServiceInterface, redisClient *redis.C
 }
 
 func (s *AuthService) RegisterUser(ctx context.Context, newUser *model.User) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
 	return s.UserService.CreateUser(ctx, newUser)
 }
 
@@ -54,21 +57,29 @@ func (s *AuthService) VerifyPhone(ctx context.Context, userID int64) error {
 }
 
 func (s *AuthService) SaveCodeToRedis(ctx context.Context, phone string, code string) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 1)
+	defer cancel()
 	key := fmt.Sprintf("auth_code:phone:%s", phone)
 	return s.redisClient.Set(ctx, key, code, 5*time.Minute).Err()
 }
 
 func (s *AuthService) GetCodeFromRedis(ctx context.Context, phone string) (string, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 1)
+	defer cancel()
 	key := fmt.Sprintf("auth_code:phone:%s", phone)
 	return s.redisClient.Get(ctx, key).Result()
 }
 
 func (s *AuthService) SavePasswordToRedis(ctx context.Context, phone string, password string) error {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 1)
+	defer cancel()
 	key := fmt.Sprintf("auth_password:phone:%s", phone)
 	return s.redisClient.Set(ctx, key, password, 5*time.Minute).Err()
 }
 
 func (s *AuthService) GetPasswordFromRedis(ctx context.Context, phone string) (string, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 1)
+	defer cancel()
 	key := fmt.Sprintf("auth_password:phone:%s", phone)
 	return s.redisClient.Get(ctx, key).Result()
 }
