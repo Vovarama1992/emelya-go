@@ -202,7 +202,7 @@ func (r *UserRepository) SetPhoneVerified(ctx context.Context, userID int64) err
 func (r *UserRepository) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	query := `
 		SELECT id, first_name, last_name, patronymic, email, phone, is_email_verified,
-		       is_phone_verified, login, password_hash, referrer_id, card_number, role
+		       is_phone_verified, login, password_hash, referrer_id, card_number, balance, role
 		FROM users
 	`
 	rows, err := r.DB.Pool.Query(ctx, query)
@@ -228,6 +228,7 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]model.User, error) 
 			&user.PasswordHash,
 			&user.ReferrerID,
 			&user.CardNumber,
+			&user.Balance, // добавлено
 			&user.Role,
 		)
 		if err != nil {
