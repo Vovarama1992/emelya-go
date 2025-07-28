@@ -41,7 +41,7 @@ func (r *DepositRepository) Create(ctx context.Context, d *model.Deposit) error 
 func (r *DepositRepository) Approve(ctx context.Context, id int64, approvedAt time.Time, blockDays int, dailyReward float64) error {
 	query := `
 		UPDATE deposits
-		SET approved_at = $1, block_until = $2, daily_reward = $3, status = 'approved'
+		SET approved_at = $1, block_days = $2, daily_reward = $3, status = 'approved'
 		WHERE id = $4
 	`
 	_, err := r.querier.Exec(ctx, query, approvedAt, blockDays, dailyReward, id)
