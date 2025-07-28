@@ -231,7 +231,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_deposit_delivery.AdminCreateDepositRequest"
+                            "$ref": "#/definitions/deposithttp.AdminCreateDepositRequest"
                         }
                     }
                 ],
@@ -486,7 +486,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_reward_delivery.AdminCreateReferralRewardRequest"
+                            "$ref": "#/definitions/rewardhttp.AdminCreateReferralRewardRequest"
                         }
                     }
                 ],
@@ -567,7 +567,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_tariff_model.Tariff"
+                                "$ref": "#/definitions/tariff.Tariff"
                             }
                         }
                     },
@@ -600,7 +600,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_tariff_delivery.UpdateTariffRequest"
+                            "$ref": "#/definitions/tariffhttp.UpdateTariffRequest"
                         }
                     }
                 ],
@@ -652,7 +652,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_tariff_delivery.CreateTariffRequest"
+                            "$ref": "#/definitions/tariffhttp.CreateTariffRequest"
                         }
                     }
                 ],
@@ -753,7 +753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_user_http.AddReferralRequest"
+                            "$ref": "#/definitions/user.AddReferralRequest"
                         }
                     }
                 ],
@@ -828,6 +828,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/user/balance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-user"
+                ],
+                "summary": "Админ: получить текущий баланс пользователя (депозиты - withdrawn)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/user/operations": {
             "get": {
                 "produces": [
@@ -850,7 +899,56 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_operation_model.Operations"
+                            "$ref": "#/definitions/operation.Operations"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/user/reward-balance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-user"
+                ],
+                "summary": "Админ: получить доступный к выводу доход пользователя (только rewards)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number"
+                            }
                         }
                     },
                     "400": {
@@ -948,7 +1046,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_user_http.AdminUpdateProfileRequest"
+                            "$ref": "#/definitions/user.AdminUpdateProfileRequest"
                         }
                     }
                 ],
@@ -1040,7 +1138,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_withdrawal_delivery.AdminApproveWithdrawalRequest"
+                            "$ref": "#/definitions/withdrawalhttp.AdminApproveWithdrawalRequest"
                         }
                     }
                 ],
@@ -1123,7 +1221,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_withdrawal_delivery.AdminRejectWithdrawalRequest"
+                            "$ref": "#/definitions/withdrawalhttp.AdminRejectWithdrawalRequest"
                         }
                     }
                 ],
@@ -1177,7 +1275,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth_delivery.ConfirmRequest"
+                            "$ref": "#/definitions/authadapter.ConfirmRequest"
                         }
                     }
                 ],
@@ -1231,7 +1329,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth_delivery.LoginRequest"
+                            "$ref": "#/definitions/authadapter.LoginRequest"
                         }
                     }
                 ],
@@ -1313,7 +1411,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth_delivery.PhoneRequest"
+                            "$ref": "#/definitions/authadapter.PhoneRequest"
                         }
                     }
                 ],
@@ -1367,7 +1465,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth_delivery.RegisterRequest"
+                            "$ref": "#/definitions/authadapter.RegisterRequest"
                         }
                     }
                 ],
@@ -1421,7 +1519,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_deposit_delivery.DepositCreateRequest"
+                            "$ref": "#/definitions/deposithttp.DepositCreateRequest"
                         }
                     }
                 ],
@@ -1522,7 +1620,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_notifier.NotifyRequest"
+                            "$ref": "#/definitions/notifier.NotifyRequest"
                         }
                     }
                 ],
@@ -1614,7 +1712,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_user_http.UpdateProfileRequest"
+                            "$ref": "#/definitions/user.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -1715,7 +1813,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_money_withdrawal_delivery.CreateWithdrawalRequest"
+                            "$ref": "#/definitions/withdrawalhttp.CreateWithdrawalRequest"
                         }
                     }
                 ],
@@ -1761,8 +1859,86 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Deposit": {
+        "authadapter.ConfirmRequest": {
             "type": "object",
+            "required": [
+                "code",
+                "phone"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "authadapter.LoginRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 5
+                }
+            }
+        },
+        "authadapter.PhoneRequest": {
+            "type": "object",
+            "required": [
+                "phone"
+            ],
+            "properties": {
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "authadapter.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "phone"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "patronymic": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "referrerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "deposithttp.AdminCreateDepositRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "created_at"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -1779,166 +1955,31 @@ const docTemplate = `{
                 "daily_reward": {
                     "type": "number"
                 },
-                "id": {
-                    "type": "integer"
+                "initial_reward_amount": {
+                    "type": "number"
                 },
-                "status": {
-                    "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Status"
-                },
-                "user_id": {
+                "tariff_id": {
                     "type": "integer"
                 }
             }
         },
-        "github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Status": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "approved",
-                "closed"
+        "deposithttp.DepositCreateRequest": {
+            "type": "object",
+            "required": [
+                "amount"
             ],
-            "x-enum-comments": {
-                "StatusApproved": "активный",
-                "StatusClosed": "закрыт, разблокирован",
-                "StatusPending": "ожидает подтверждения"
-            },
-            "x-enum-varnames": [
-                "StatusPending",
-                "StatusApproved",
-                "StatusClosed"
-            ]
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_operation_model.Operations": {
-            "type": "object",
-            "properties": {
-                "deposits": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_deposit_model.Deposit"
-                    }
-                },
-                "rewards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_reward_model.Reward"
-                    }
-                },
-                "withdrawals": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.Withdrawal"
-                    }
-                }
-            }
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_reward_model.Reward": {
-            "type": "object",
             "properties": {
                 "amount": {
                     "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "deposit_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_accrued_at": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_reward_model.RewardType"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "withdrawn": {
-                    "type": "number"
                 }
             }
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_reward_model.RewardType": {
-            "type": "string",
-            "enum": [
-                "deposit",
-                "referral"
-            ],
-            "x-enum-varnames": [
-                "RewardTypeDeposit",
-                "RewardTypeReferral"
-            ]
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_tariff_model.Tariff": {
-            "type": "object",
-            "properties": {
-                "block_until": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "daily_reward": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.Withdrawal": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "approved_at": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "rejected_at": {
-                    "type": "string"
-                },
-                "reward_id": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.WithdrawalStatus"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "github_com_Vovarama1992_emelya-go_internal_money_withdrawal_model.WithdrawalStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "approved",
-                "rejected"
-            ],
-            "x-enum-varnames": [
-                "WithdrawalStatusPending",
-                "WithdrawalStatusApproved",
-                "WithdrawalStatusRejected"
-            ]
         },
         "github_com_Vovarama1992_emelya-go_internal_user_model.User": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "cardNumber": {
                     "type": "string"
                 },
@@ -1976,101 +2017,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "role": {
-                    "$ref": "#/definitions/github_com_Vovarama1992_emelya-go_internal_user_model.UserRole"
+                    "$ref": "#/definitions/user.UserRole"
                 }
             }
         },
-        "github_com_Vovarama1992_emelya-go_internal_user_model.UserRole": {
-            "type": "string",
-            "enum": [
-                "user",
-                "admin"
-            ],
-            "x-enum-varnames": [
-                "RoleUser",
-                "RoleAdmin"
-            ]
-        },
-        "internal_auth_delivery.ConfirmRequest": {
+        "model_deposit.Deposit": {
             "type": "object",
-            "required": [
-                "code",
-                "phone"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_auth_delivery.LoginRequest": {
-            "type": "object",
-            "required": [
-                "login",
-                "password"
-            ],
-            "properties": {
-                "login": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8
-                }
-            }
-        },
-        "internal_auth_delivery.PhoneRequest": {
-            "type": "object",
-            "required": [
-                "phone"
-            ],
-            "properties": {
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_auth_delivery.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "first_name",
-                "last_name",
-                "phone"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "last_name": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "patronymic": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "referrerId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_money_deposit_delivery.AdminCreateDepositRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "created_at"
-            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -2087,23 +2039,108 @@ const docTemplate = `{
                 "daily_reward": {
                     "type": "number"
                 },
-                "tariff_id": {
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/model_deposit.Status"
+                },
+                "user_id": {
                     "type": "integer"
                 }
             }
         },
-        "internal_money_deposit_delivery.DepositCreateRequest": {
-            "type": "object",
-            "required": [
-                "amount"
+        "model_deposit.Status": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "approved",
+                "closed"
             ],
+            "x-enum-comments": {
+                "StatusApproved": "активный",
+                "StatusClosed": "закрыт, разблокирован",
+                "StatusPending": "ожидает подтверждения"
+            },
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusApproved",
+                "StatusClosed"
+            ]
+        },
+        "notifier.NotifyRequest": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "example": "Имя: Иванов Иван\nТелефон: +7900...\nТариф: Премиум"
+                }
+            }
+        },
+        "operation.Operations": {
+            "type": "object",
+            "properties": {
+                "deposits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model_deposit.Deposit"
+                    }
+                },
+                "rewards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/reward.Reward"
+                    }
+                },
+                "withdrawals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/withdrawal_model.Withdrawal"
+                    }
+                }
+            }
+        },
+        "reward.Reward": {
+            "type": "object",
             "properties": {
                 "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deposit_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_accrued_at": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/reward.RewardType"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "withdrawn": {
                     "type": "number"
                 }
             }
         },
-        "internal_money_reward_delivery.AdminCreateReferralRewardRequest": {
+        "reward.RewardType": {
+            "type": "string",
+            "enum": [
+                "deposit",
+                "referral"
+            ],
+            "x-enum-varnames": [
+                "RewardTypeDeposit",
+                "RewardTypeReferral"
+            ]
+        },
+        "rewardhttp.AdminCreateReferralRewardRequest": {
             "type": "object",
             "required": [
                 "amount",
@@ -2118,7 +2155,27 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_money_tariff_delivery.CreateTariffRequest": {
+        "tariff.Tariff": {
+            "type": "object",
+            "properties": {
+                "block_until": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "daily_reward": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "tariffhttp.CreateTariffRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -2136,7 +2193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_money_tariff_delivery.UpdateTariffRequest": {
+        "tariffhttp.UpdateTariffRequest": {
             "type": "object",
             "required": [
                 "id",
@@ -2157,57 +2214,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_money_withdrawal_delivery.AdminApproveWithdrawalRequest": {
-            "type": "object",
-            "required": [
-                "withdrawal_id"
-            ],
-            "properties": {
-                "withdrawal_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_money_withdrawal_delivery.AdminRejectWithdrawalRequest": {
-            "type": "object",
-            "required": [
-                "reason",
-                "withdrawal_id"
-            ],
-            "properties": {
-                "reason": {
-                    "type": "string"
-                },
-                "withdrawal_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_money_withdrawal_delivery.CreateWithdrawalRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "reward_id"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "reward_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_notifier.NotifyRequest": {
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "string",
-                    "example": "Имя: Иванов Иван\nТелефон: +7900...\nТариф: Премиум"
-                }
-            }
-        },
-        "internal_user_http.AddReferralRequest": {
+        "user.AddReferralRequest": {
             "type": "object",
             "required": [
                 "referrer_id",
@@ -2222,7 +2229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_user_http.AdminUpdateProfileRequest": {
+        "user.AdminUpdateProfileRequest": {
             "type": "object",
             "required": [
                 "user_id"
@@ -2248,7 +2255,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_user_http.UpdateProfileRequest": {
+        "user.UpdateProfileRequest": {
             "type": "object",
             "properties": {
                 "card_number": {
@@ -2265,6 +2272,103 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                }
+            }
+        },
+        "user.UserRole": {
+            "type": "string",
+            "enum": [
+                "user",
+                "admin"
+            ],
+            "x-enum-varnames": [
+                "RoleUser",
+                "RoleAdmin"
+            ]
+        },
+        "withdrawal_model.Withdrawal": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "approved_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "rejected_at": {
+                    "type": "string"
+                },
+                "reward_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/withdrawal_model.WithdrawalStatus"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "withdrawal_model.WithdrawalStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "approved",
+                "rejected"
+            ],
+            "x-enum-varnames": [
+                "WithdrawalStatusPending",
+                "WithdrawalStatusApproved",
+                "WithdrawalStatusRejected"
+            ]
+        },
+        "withdrawalhttp.AdminApproveWithdrawalRequest": {
+            "type": "object",
+            "required": [
+                "withdrawal_id"
+            ],
+            "properties": {
+                "withdrawal_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "withdrawalhttp.AdminRejectWithdrawalRequest": {
+            "type": "object",
+            "required": [
+                "reason",
+                "withdrawal_id"
+            ],
+            "properties": {
+                "reason": {
+                    "type": "string"
+                },
+                "withdrawal_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "withdrawalhttp.CreateWithdrawalRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "reward_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "reward_id": {
+                    "type": "integer"
                 }
             }
         }
