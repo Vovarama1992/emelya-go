@@ -32,11 +32,7 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports
 	)
 
 	mux.Handle("/api/user/balance",
-		withRecover(withUserAuth(http.HandlerFunc(handler.GetUserBalance))),
-	)
-
-	mux.Handle("/api/user/reward-balance",
-		withRecover(withUserAuth(http.HandlerFunc(handler.GetUserRewardBalance))),
+		withRecover(withUserAuth(http.HandlerFunc(handler.GetUserFullBalance))),
 	)
 
 	// === ADMIN ===

@@ -884,7 +884,7 @@ paths:
       summary: Получить всех пользователей
       tags:
       - user
-  /api/admin/user/balance:
+  /api/admin/user/full-balance:
     get:
       parameters:
       - description: ID пользователя
@@ -913,7 +913,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: 'Админ: получить текущий баланс пользователя (депозиты - withdrawn)'
+      summary: 'Админ: получить баланс пользователя (депозиты и доступные награды)'
       tags:
       - admin-user
   /api/admin/user/operations:
@@ -944,38 +944,6 @@ paths:
               type: string
             type: object
       summary: 'Админ: все операции пользователя (депозиты, выводы, награды)'
-      tags:
-      - admin-user
-  /api/admin/user/reward-balance:
-    get:
-      parameters:
-      - description: ID пользователя
-        in: query
-        name: user_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: number
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 'Админ: получить доступный к выводу доход пользователя (только rewards)'
       tags:
       - admin-user
   /api/admin/user/search-id:

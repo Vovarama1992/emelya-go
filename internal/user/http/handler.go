@@ -253,14 +253,14 @@ func (h *Handler) GetUserOperations(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ops)
 }
 
-// @Summary Админ: получить текущий баланс пользователя (депозиты - withdrawn)
+// @Summary Админ: получить баланс пользователя (депозиты и доступные награды)
 // @Tags admin-user
 // @Produce json
 // @Param user_id query int true "ID пользователя"
 // @Success 200 {object} map[string]float64
 // @Failure 400,500 {object} map[string]string
-// @Router /api/admin/user/balance [get]
-func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
+// @Router /api/admin/user/full-balance [get]
+func (h *Handler) GetUserFullBalance(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil || userID <= 0 {
@@ -270,33 +270,18 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 
 	balance, err := h.userService.GetCurrentBalance(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "Не удалось получить баланс", http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(map[string]float64{"balance": balance})
-}
-
-// @Summary Админ: получить доступный к выводу доход пользователя (только rewards)
-// @Tags admin-user
-// @Produce json
-// @Param user_id query int true "ID пользователя"
-// @Success 200 {object} map[string]float64
-// @Failure 400,500 {object} map[string]string
-// @Router /api/admin/user/reward-balance [get]
-func (h *Handler) GetUserRewardBalance(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || userID <= 0 {
-		http.Error(w, "Некорректный user_id", http.StatusBadRequest)
+		http.Error(w, "Не удалось получить общий баланс", http.StatusInternalServerError)
 		return
 	}
 
 	rewardBalance, err := h.userService.GetTotalRewardBalance(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "Не удалось получить reward баланс", http.StatusInternalServerError)
+		http.Error(w, "Не удалось получить reward-баланс", http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]float64{"reward_balance": rewardBalance})
+	json.NewEncoder(w).Encode(map[string]float64{
+		"balance":        balance,
+		"reward_balance": rewardBalance,
+	})
 }

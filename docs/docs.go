@@ -828,7 +828,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/admin/user/balance": {
+        "/api/admin/user/full-balance": {
             "get": {
                 "produces": [
                     "application/json"
@@ -836,7 +836,7 @@ const docTemplate = `{
                 "tags": [
                     "admin-user"
                 ],
-                "summary": "Админ: получить текущий баланс пользователя (депозиты - withdrawn)",
+                "summary": "Админ: получить баланс пользователя (депозиты и доступные награды)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -900,55 +900,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/operation.Operations"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/admin/user/reward-balance": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-user"
-                ],
-                "summary": "Админ: получить доступный к выводу доход пользователя (только rewards)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID пользователя",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "number"
-                            }
                         }
                     },
                     "400": {
