@@ -15,11 +15,18 @@ var (
 )
 
 type RewardService struct {
-	repo ports.RewardRepository
+	repo           ports.RewardRepository
+	depositService ports.DepositService
 }
 
-func NewRewardService(repo ports.RewardRepository) *RewardService {
-	return &RewardService{repo: repo}
+func NewRewardService(
+	repo ports.RewardRepository,
+	depositService ports.DepositService,
+) *RewardService {
+	return &RewardService{
+		repo:           repo,
+		depositService: depositService,
+	}
 }
 
 func (s *RewardService) Create(ctx context.Context, reward *model.Reward) error {
@@ -49,7 +56,13 @@ func (s *RewardService) FindByUserID(ctx context.Context, userID int64) ([]*mode
 func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, depositID int64, dailyReward float64) error {
 	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
 	defer cancel()
+
 	reward, err := s.repo.FindByDepositID(ctx, depositID)
+	if err != nil {
+		return err
+	}
+
+	deposit, err := s.depositService.GetDepositByID(ctx, depositID)
 	if err != nil {
 		return err
 	}
@@ -57,7 +70,7 @@ func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, deposit
 	now := time.Now()
 	last := reward.LastAccruedAt
 	if last == nil {
-		// Первый раз, ничего не начисляем задним числом, просто фиксируем дату
+		// Первый раз — просто фиксируем дату
 		return s.repo.UpdateAmountAndLastAccruedAt(ctx, reward.ID, 0, now)
 	}
 
@@ -66,7 +79,8 @@ func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, deposit
 		return nil
 	}
 
-	delta := float64(daysMissed) * dailyReward
+	percent := dailyReward
+	delta := deposit.Amount * percent * float64(daysMissed)
 	newAccruedAt := last.Add(time.Duration(daysMissed) * 24 * time.Hour)
 
 	return s.repo.UpdateAmountAndLastAccruedAt(ctx, reward.ID, delta, newAccruedAt)
