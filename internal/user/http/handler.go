@@ -259,7 +259,7 @@ func (h *Handler) GetUserOperations(w http.ResponseWriter, r *http.Request) {
 // @Param user_id query int true "ID пользователя"
 // @Success 200 {object} map[string]float64
 // @Failure 400,500 {object} map[string]string
-// @Router /api/admin/user/full-balance [get]
+// @Router /api/user/balance [get]
 func (h *Handler) GetUserFullBalance(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)

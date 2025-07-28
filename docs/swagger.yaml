@@ -884,38 +884,6 @@ paths:
       summary: Получить всех пользователей
       tags:
       - user
-  /api/admin/user/full-balance:
-    get:
-      parameters:
-      - description: ID пользователя
-        in: query
-        name: user_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: number
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 'Админ: получить баланс пользователя (депозиты и доступные награды)'
-      tags:
-      - admin-user
   /api/admin/user/operations:
     get:
       parameters:
@@ -1415,6 +1383,38 @@ paths:
       summary: 'Юзер: получить свои вознаграждения'
       tags:
       - reward
+  /api/user/balance:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: number
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 'Админ: получить баланс пользователя (депозиты и доступные награды)'
+      tags:
+      - admin-user
   /api/user/update-profile:
     post:
       consumes:
