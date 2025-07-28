@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	ports "github.com/Vovarama1992/emelya-go/internal/money/ports"
 	model "github.com/Vovarama1992/emelya-go/internal/money/tariff/model"
@@ -70,19 +69,9 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var blockUntil *time.Time
-	if req.BlockUntil != nil {
-		t, err := time.Parse(time.RFC3339, *req.BlockUntil)
-		if err != nil {
-			http.Error(w, "Некорректный формат даты block_until", http.StatusBadRequest)
-			return
-		}
-		blockUntil = &t
-	}
-
 	tariff := &model.Tariff{
 		Name:        req.Name,
-		BlockUntil:  blockUntil,
+		BlockDays:   req.BlockDays,
 		DailyReward: req.DailyReward,
 	}
 
@@ -115,20 +104,10 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var blockUntil *time.Time
-	if req.BlockUntil != nil {
-		t, err := time.Parse(time.RFC3339, *req.BlockUntil)
-		if err != nil {
-			http.Error(w, "Некорректный формат даты block_until", http.StatusBadRequest)
-			return
-		}
-		blockUntil = &t
-	}
-
 	tariff := &model.Tariff{
 		ID:          req.ID,
 		Name:        req.Name,
-		BlockUntil:  blockUntil,
+		BlockDays:   req.BlockDays,
 		DailyReward: req.DailyReward,
 	}
 

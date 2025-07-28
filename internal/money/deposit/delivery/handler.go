@@ -75,8 +75,9 @@ func (h *Handler) CreateDeposit(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id query int true "ID депозита"
 // @Param approved_at query string true "Дата одобрения в формате RFC3339"
-// @Param block_until query string true "Дата блокировки в формате RFC3339"
-// @Param daily_reward query number true "Дневная награда"
+// @Param block_days query int false "Количество дней блокировки"
+// @Param daily_reward query number false "Дневная награда"
+// @Param tariff_id query int false "ID тарифа"
 // @Success 200 {object} map[string]string
 // @Failure 400,500 {object} map[string]string
 // @Router /api/admin/deposit/approve [post]
@@ -88,7 +89,7 @@ func (h *Handler) ApproveDeposit(w http.ResponseWriter, r *http.Request) {
 
 	idStr := r.URL.Query().Get("id")
 	approvedAtStr := r.URL.Query().Get("approved_at")
-	blockUntilStr := r.URL.Query().Get("block_until")
+	blockDaysStr := r.URL.Query().Get("block_days")
 	dailyRewardStr := r.URL.Query().Get("daily_reward")
 	tariffIDStr := r.URL.Query().Get("tariff_id")
 
@@ -104,14 +105,14 @@ func (h *Handler) ApproveDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var blockUntil *time.Time
-	if blockUntilStr != "" {
-		t, err := time.Parse(time.RFC3339, blockUntilStr)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
+	var blockDays *int
+	if blockDaysStr != "" {
+		v, err := strconv.Atoi(blockDaysStr)
+		if err != nil || v <= 0 {
+			respondWithError(w, http.StatusBadRequest, "Некорректный block_days")
 			return
 		}
-		blockUntil = &t
+		blockDays = &v
 	}
 
 	var dailyReward *float64
@@ -134,7 +135,7 @@ func (h *Handler) ApproveDeposit(w http.ResponseWriter, r *http.Request) {
 		tariffID = &v
 	}
 
-	if err := h.depositService.ApproveDeposit(r.Context(), id, approvedAt, blockUntil, dailyReward, tariffID); err != nil {
+	if err := h.depositService.ApproveDeposit(r.Context(), id, approvedAt, blockDays, dailyReward, tariffID); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Не удалось одобрить депозит")
 		return
 	}
@@ -277,7 +278,7 @@ func (h *Handler) CloseDeposit(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param user_id query int true "ID инвестора"
 // @Param data body AdminCreateDepositRequest true "Данные депозита"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} map[string]interface{} "deposit_id"
 // @Failure 400,500 {object} map[string]string
 // @Router /api/admin/deposit/create [post]
 func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
@@ -319,14 +320,9 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		approvedAt = &t
 	}
 
-	var blockUntil *time.Time
-	if req.BlockUntil != "" {
-		t, err := time.Parse(time.RFC3339, req.BlockUntil)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "Некорректный block_until")
-			return
-		}
-		blockUntil = &t
+	var blockDays *int
+	if req.BlockDays != nil {
+		blockDays = req.BlockDays
 	}
 
 	var dailyReward *float64
@@ -350,7 +346,7 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		req.Amount,
 		createdAt,
 		approvedAt,
-		blockUntil,
+		blockDays,
 		dailyReward,
 		tariffID,
 		initialRewardAmount,
@@ -360,7 +356,10 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]any{"message": "Депозит создан", "deposit_id": id})
+	json.NewEncoder(w).Encode(map[string]any{
+		"message":    "Депозит создан",
+		"deposit_id": id,
+	})
 }
 
 // AdminDeleteDeposit godoc

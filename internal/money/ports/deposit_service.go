@@ -14,7 +14,7 @@ type DepositService interface {
 		ctx context.Context,
 		depositID int64,
 		approvedAt time.Time,
-		blockUntil *time.Time,
+		blockDays *int,
 		dailyReward *float64,
 		tariffID *int64,
 	) error
@@ -31,7 +31,7 @@ type DepositService interface {
 		amount float64,
 		createdAt time.Time,
 		approvedAt *time.Time,
-		blockUntil *time.Time,
+		blockDays *int,
 		dailyReward *float64,
 		tariffID *int64,
 		initialRewardAmount *float64,

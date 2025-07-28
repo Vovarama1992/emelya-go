@@ -38,19 +38,19 @@ func (r *DepositRepository) Create(ctx context.Context, d *model.Deposit) error 
 	return r.querier.QueryRow(ctx, query, d.UserID, d.Amount, d.Status).Scan(&d.ID, &d.CreatedAt)
 }
 
-func (r *DepositRepository) Approve(ctx context.Context, id int64, approvedAt, blockUntil time.Time, dailyReward float64) error {
+func (r *DepositRepository) Approve(ctx context.Context, id int64, approvedAt time.Time, blockDays int, dailyReward float64) error {
 	query := `
 		UPDATE deposits
 		SET approved_at = $1, block_until = $2, daily_reward = $3, status = 'approved'
 		WHERE id = $4
 	`
-	_, err := r.querier.Exec(ctx, query, approvedAt, blockUntil, dailyReward, id)
+	_, err := r.querier.Exec(ctx, query, approvedAt, blockDays, dailyReward, id)
 	return err
 }
 
 func (r *DepositRepository) FindByID(ctx context.Context, id int64) (*model.Deposit, error) {
 	query := `
-		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		SELECT id, user_id, amount, created_at, approved_at, block_days, daily_reward, status
 		FROM deposits
 		WHERE id = $1
 	`
@@ -61,7 +61,7 @@ func (r *DepositRepository) FindByID(ctx context.Context, id int64) (*model.Depo
 		&d.Amount,
 		&d.CreatedAt,
 		&d.ApprovedAt,
-		&d.BlockUntil,
+		&d.BlockDays,
 		&d.DailyReward,
 		&d.Status,
 	)
@@ -73,7 +73,7 @@ func (r *DepositRepository) FindByID(ctx context.Context, id int64) (*model.Depo
 
 func (r *DepositRepository) FindByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error) {
 	query := `
-		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		SELECT id, user_id, amount, created_at, approved_at, block_days, daily_reward, status
 		FROM deposits
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -93,7 +93,7 @@ func (r *DepositRepository) FindByUserID(ctx context.Context, userID int64) ([]*
 			&d.Amount,
 			&d.CreatedAt,
 			&d.ApprovedAt,
-			&d.BlockUntil,
+			&d.BlockDays,
 			&d.DailyReward,
 			&d.Status,
 		); err != nil {
@@ -116,7 +116,7 @@ func (r *DepositRepository) Close(ctx context.Context, id int64) error {
 
 func (r *DepositRepository) FindPending(ctx context.Context) ([]*model.Deposit, error) {
 	query := `
-		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		SELECT id, user_id, amount, created_at, approved_at, block_days, daily_reward, status
 		FROM deposits
 		WHERE status = 'pending'
 		ORDER BY created_at DESC
@@ -136,7 +136,7 @@ func (r *DepositRepository) FindPending(ctx context.Context) ([]*model.Deposit, 
 			&d.Amount,
 			&d.CreatedAt,
 			&d.ApprovedAt,
-			&d.BlockUntil,
+			&d.BlockDays,
 			&d.DailyReward,
 			&d.Status,
 		); err != nil {
@@ -149,7 +149,7 @@ func (r *DepositRepository) FindPending(ctx context.Context) ([]*model.Deposit, 
 
 func (r *DepositRepository) CreateApproved(ctx context.Context, d *model.Deposit) error {
 	query := `
-		INSERT INTO deposits (user_id, amount, created_at, approved_at, block_until, daily_reward, status)
+		INSERT INTO deposits (user_id, amount, created_at, approved_at, block_days, daily_reward, status)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
 	`
@@ -158,7 +158,7 @@ func (r *DepositRepository) CreateApproved(ctx context.Context, d *model.Deposit
 		d.Amount,
 		d.CreatedAt,
 		d.ApprovedAt,
-		d.BlockUntil,
+		d.BlockDays,
 		d.DailyReward,
 		d.Status, // передаём как $7
 	).Scan(&d.ID)
@@ -166,7 +166,7 @@ func (r *DepositRepository) CreateApproved(ctx context.Context, d *model.Deposit
 
 func (r *DepositRepository) FindAllApproved(ctx context.Context) ([]*model.Deposit, error) {
 	query := `
-		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		SELECT id, user_id, amount, created_at, approved_at, block_days, daily_reward, status
 		FROM deposits
 		WHERE status = 'approved'
 		ORDER BY created_at DESC
@@ -186,7 +186,7 @@ func (r *DepositRepository) FindAllApproved(ctx context.Context) ([]*model.Depos
 			&d.Amount,
 			&d.CreatedAt,
 			&d.ApprovedAt,
-			&d.BlockUntil,
+			&d.BlockDays,
 			&d.DailyReward,
 			&d.Status,
 		); err != nil {
@@ -215,7 +215,7 @@ func (r *DepositRepository) GetTotalApprovedAmount(ctx context.Context) (float64
 
 func (r *DepositRepository) FindApprovedByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error) {
 	query := `
-		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		SELECT id, user_id, amount, created_at, approved_at, block_days, daily_reward, status
 		FROM deposits
 		WHERE user_id = $1 AND status = 'approved'
 		ORDER BY created_at DESC
@@ -235,7 +235,7 @@ func (r *DepositRepository) FindApprovedByUserID(ctx context.Context, userID int
 			&d.Amount,
 			&d.CreatedAt,
 			&d.ApprovedAt,
-			&d.BlockUntil,
+			&d.BlockDays,
 			&d.DailyReward,
 			&d.Status,
 		); err != nil {

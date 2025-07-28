@@ -20,7 +20,7 @@ type Deposit struct {
 	Amount      float64    `json:"amount"`
 	CreatedAt   time.Time  `json:"created_at"`
 	ApprovedAt  *time.Time `json:"approved_at,omitempty"`
-	BlockUntil  *time.Time `json:"block_until,omitempty"`
+	BlockDays   *int       `json:"block_days,omitempty"`
 	DailyReward *float64   `json:"daily_reward,omitempty"`
 	Status      Status     `json:"status"`
 }

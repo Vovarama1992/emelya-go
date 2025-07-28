@@ -77,7 +77,7 @@ func (s *DepositService) ApproveDeposit(
 	ctx context.Context,
 	depositID int64,
 	approvedAt time.Time,
-	blockUntil *time.Time,
+	BlockDays *int,
 	dailyReward *float64,
 	tariffID *int64,
 ) (err error) {
@@ -104,7 +104,7 @@ func (s *DepositService) ApproveDeposit(
 		return ErrDepositNotFound
 	}
 
-	if (blockUntil == nil || dailyReward == nil) && tariffID == nil {
+	if (BlockDays == nil || dailyReward == nil) && tariffID == nil {
 		return errors.New("либо передайте blockUntil/dailyReward, либо tariffID")
 	}
 
@@ -113,14 +113,14 @@ func (s *DepositService) ApproveDeposit(
 		if err != nil {
 			return fmt.Errorf("не удалось найти тариф: %w", err)
 		}
-		if tariff.BlockUntil == nil || tariff.DailyReward == nil {
+		if tariff.BlockDays == nil || tariff.DailyReward == nil {
 			return fmt.Errorf("у тарифа нет необходимых полей blockUntil или dailyReward")
 		}
-		blockUntil = tariff.BlockUntil
+		BlockDays = tariff.BlockDays
 		dailyReward = tariff.DailyReward
 	}
 
-	err = txDepositRepo.Approve(ctx, depositID, approvedAt, *blockUntil, *dailyReward)
+	err = txDepositRepo.Approve(ctx, depositID, approvedAt, *BlockDays, *dailyReward)
 	if err != nil {
 		return err
 	}
@@ -200,10 +200,10 @@ func (s *DepositService) CreateDepositByAdmin(
 	amount float64,
 	createdAt time.Time,
 	approvedAt *time.Time,
-	blockUntil *time.Time,
+	blockDays *int, // ← заменили тип
 	dailyReward *float64,
 	tariffID *int64,
-	initialRewardAmount *float64, // ← добавили
+	initialRewardAmount *float64,
 ) (int64, error) {
 	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
 	defer cancel()
@@ -223,8 +223,8 @@ func (s *DepositService) CreateDepositByAdmin(
 	txDepositRepo := deposit_infra.NewDepositRepositoryWithTx(tx)
 	txRewardRepo := reward_infra.NewRewardRepositoryWithTx(tx)
 
-	if (blockUntil == nil || dailyReward == nil) && tariffID == nil {
-		return 0, errors.New("либо передайте blockUntil/dailyReward, либо tariffID")
+	if (blockDays == nil || dailyReward == nil) && tariffID == nil {
+		return 0, errors.New("либо передайте blockDays/dailyReward, либо tariffID")
 	}
 
 	if tariffID != nil {
@@ -232,21 +232,20 @@ func (s *DepositService) CreateDepositByAdmin(
 		if err != nil {
 			return 0, fmt.Errorf("не удалось найти тариф: %w", err)
 		}
-		if tariff.BlockUntil == nil || tariff.DailyReward == nil {
-			return 0, fmt.Errorf("у тарифа нет необходимых полей blockUntil или dailyReward")
+		if tariff.BlockDays == nil || tariff.DailyReward == nil {
+			return 0, fmt.Errorf("у тарифа нет необходимых полей blockDays или dailyReward")
 		}
-		blockUntil = tariff.BlockUntil
+		blockDays = tariff.BlockDays
 		dailyReward = tariff.DailyReward
 	}
 
 	deposit := &model.Deposit{
-		UserID:      userID,
-		Amount:      amount,
-		CreatedAt:   createdAt,
-		ApprovedAt:  approvedAt,
-		BlockUntil:  blockUntil,
-		DailyReward: dailyReward,
-		Status:      model.StatusApproved,
+		UserID:     userID,
+		Amount:     amount,
+		CreatedAt:  createdAt,
+		ApprovedAt: approvedAt,
+		BlockDays:  blockDays, // ← используем новое поле
+		Status:     model.StatusApproved,
 	}
 
 	err = txDepositRepo.CreateApproved(ctx, deposit)
