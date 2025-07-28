@@ -339,6 +339,11 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		tariffID = req.TariffID
 	}
 
+	var initialRewardAmount *float64
+	if req.InitialRewardAmount != nil {
+		initialRewardAmount = req.InitialRewardAmount
+	}
+
 	id, err := h.depositService.CreateDepositByAdmin(
 		r.Context(),
 		userID,
@@ -348,6 +353,7 @@ func (h *Handler) AdminCreateDeposit(w http.ResponseWriter, r *http.Request) {
 		blockUntil,
 		dailyReward,
 		tariffID,
+		initialRewardAmount,
 	)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())

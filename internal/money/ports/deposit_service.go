@@ -32,11 +32,13 @@ type DepositService interface {
 		createdAt time.Time,
 		approvedAt *time.Time,
 		blockUntil *time.Time,
-		tarif string,
 		dailyReward *float64,
 		tariffID *int64,
+		initialRewardAmount *float64,
 	) (int64, error)
 
 	DeleteDepositByAdmin(ctx context.Context, id int64) error
 	GetTotalApprovedAmount(ctx context.Context) (float64, error)
+	GetAllApprovedDeposits(ctx context.Context) ([]*model.Deposit, error)
+	GetApprovedDepositsByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error)
 }

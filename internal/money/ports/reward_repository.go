@@ -15,4 +15,5 @@ type RewardRepository interface {
 	FindByDepositID(ctx context.Context, depositID int64) (*model.Reward, error)
 	UpdateAmountAndLastAccruedAt(ctx context.Context, rewardID int64, delta float64, accruedAt time.Time) error
 	GetTotalAvailableAmount(ctx context.Context) (float64, error)
+	FindByDepositIDs(ctx context.Context, depositIDs []int64) ([]*model.Reward, error)
 }

@@ -18,6 +18,10 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports
 		return httputil.RecoverMiddleware(httputil.NewRateLimiter(5, time.Minute)(h))
 	}
 
+	withUserAuth := func(h http.Handler) http.Handler {
+		return middleware.AuthMiddleware(userService, false)(h)
+	}
+
 	withAdminAuth := func(h http.Handler) http.Handler {
 		return middleware.AuthMiddleware(userService, true)(h)
 	}
@@ -25,6 +29,14 @@ func RegisterRoutes(mux *http.ServeMux, handler *Handler, userService user_ports
 	// === USER ===
 	mux.Handle("/api/user/update-profile",
 		withRecoverAndRateLimit(http.HandlerFunc(handler.UpdateProfile)),
+	)
+
+	mux.Handle("/api/user/balance",
+		withRecover(withUserAuth(http.HandlerFunc(handler.GetUserBalance))),
+	)
+
+	mux.Handle("/api/user/reward-balance",
+		withRecover(withUserAuth(http.HandlerFunc(handler.GetUserRewardBalance))),
 	)
 
 	// === ADMIN ===

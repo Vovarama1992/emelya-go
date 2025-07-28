@@ -212,3 +212,36 @@ func (r *DepositRepository) GetTotalApprovedAmount(ctx context.Context) (float64
 	}
 	return total, nil
 }
+
+func (r *DepositRepository) FindApprovedByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error) {
+	query := `
+		SELECT id, user_id, amount, created_at, approved_at, block_until, daily_reward, status
+		FROM deposits
+		WHERE user_id = $1 AND status = 'approved'
+		ORDER BY created_at DESC
+	`
+	rows, err := r.querier.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var deposits []*model.Deposit
+	for rows.Next() {
+		var d model.Deposit
+		if err := rows.Scan(
+			&d.ID,
+			&d.UserID,
+			&d.Amount,
+			&d.CreatedAt,
+			&d.ApprovedAt,
+			&d.BlockUntil,
+			&d.DailyReward,
+			&d.Status,
+		); err != nil {
+			return nil, err
+		}
+		deposits = append(deposits, &d)
+	}
+	return deposits, nil
+}

@@ -77,3 +77,26 @@ func (s *RewardService) GetTotalAvailableAmount(ctx context.Context) (float64, e
 	defer cancel()
 	return s.repo.GetTotalAvailableAmount(ctx)
 }
+
+func (s *RewardService) FindByDepositIDs(ctx context.Context, depositIDs []int64) ([]*model.Reward, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+	return s.repo.FindByDepositIDs(ctx, depositIDs)
+}
+
+func (s *RewardService) GetNetRewardBalance(ctx context.Context, userID int64) (float64, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+
+	rewards, err := s.repo.FindByUserID(ctx, userID)
+	if err != nil {
+		return 0, err
+	}
+
+	var total float64
+	for _, r := range rewards {
+		total += r.Amount - r.Withdrawn
+	}
+
+	return total, nil
+}

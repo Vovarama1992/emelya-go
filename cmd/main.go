@@ -40,7 +40,7 @@ import (
 )
 
 func main() {
-	// Swagger docs setup
+	// Swagger
 	docs.SwaggerInfo.Title = "Emelya API"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Description = "API для регистрации, логина и управления пользователями"
@@ -63,16 +63,10 @@ func main() {
 	})
 	defer redisClient.Close()
 
-	// Пользователи
-	userRepo := userinfra.NewUserRepository(dbConn)
+	// Базовые компоненты
 	notifierService := notifier.NewNotifier()
-	userService := userusecase.NewService(userRepo, notifierService)
 
-	// Аутентификация
-	authService := authusecase.NewAuthService(userService, redisClient, notifierService)
-	authHandler := authadapter.NewHandler(authService, notifierService)
-
-	// Деньги - депозиты, награды, выводы
+	// Инфра и сервисы: деньги
 	depositRepo := depositinfra.NewDepositRepository(dbConn)
 	rewardRepo := rewardinfra.NewRewardRepository(dbConn)
 	withdrawalRepo := withdrawalinfra.NewWithdrawalRepository(dbConn)
@@ -84,7 +78,15 @@ func main() {
 	withdrawalService := usecase.NewWithdrawalService(withdrawalRepo, rewardService, dbConn, notifierService)
 	operationService := usecase.NewOperationsService(depositService, rewardService, withdrawalService)
 
-	// CRON для начисления наград по депозитам (каждый час)
+	// User (теперь после money-сервисов)
+	userRepo := userinfra.NewUserRepository(dbConn)
+	userService := userusecase.NewService(userRepo, notifierService, depositService, rewardService)
+
+	// Auth
+	authService := authusecase.NewAuthService(userService, redisClient, notifierService)
+	authHandler := authadapter.NewHandler(authService, notifierService)
+
+	// Cron
 	cronScheduler := scheduler.StartDepositRewardCron(depositService)
 	defer cronScheduler.Stop()
 
@@ -96,9 +98,8 @@ func main() {
 	notifyHandler := notifieradapter.NewNotifyHandler(notifierService)
 	tarifHandler := tariffhttp.NewHandler(tariffService)
 
-	// HTTP Routes
+	// Routes
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
 	})
@@ -111,7 +112,7 @@ func main() {
 	withdrawalhttp.RegisterRoutes(mux, withdrawalHandler, userService)
 	tariffhttp.RegisterRoutes(mux, tarifHandler, userService)
 
-	// Swagger UI
+	// Swagger
 	mux.Handle("/api/docs/", httpSwagger.Handler(
 		httpSwagger.URL("/api/docs/doc.json"),
 	))
@@ -124,6 +125,7 @@ func main() {
 		AllowCredentials: true,
 	}).Handler(mux)
 
+	// Start
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

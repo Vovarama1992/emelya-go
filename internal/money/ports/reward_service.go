@@ -13,4 +13,6 @@ type RewardService interface {
 	FindByUserID(ctx context.Context, userID int64) ([]*model.Reward, error)
 	AccrueDailyRewardForDeposit(ctx context.Context, depositID int64, dailyReward float64) error
 	GetTotalAvailableAmount(ctx context.Context) (float64, error)
+	FindByDepositIDs(ctx context.Context, depositIDs []int64) ([]*model.Reward, error)
+	GetNetRewardBalance(ctx context.Context, userID int64) (float64, error)
 }

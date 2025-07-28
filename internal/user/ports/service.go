@@ -15,4 +15,6 @@ type UserServiceInterface interface {
 	UpdateProfile(ctx context.Context, user *user.User) error
 	SetReferrer(ctx context.Context, userID int64, referrerID int64) error
 	GetAllUsers(ctx context.Context) ([]user.User, error)
+	GetCurrentBalance(ctx context.Context, userID int64) (float64, error)
+	GetTotalRewardBalance(ctx context.Context, userID int64) (float64, error)
 }

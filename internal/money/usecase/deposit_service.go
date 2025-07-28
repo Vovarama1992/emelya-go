@@ -203,6 +203,7 @@ func (s *DepositService) CreateDepositByAdmin(
 	blockUntil *time.Time,
 	dailyReward *float64,
 	tariffID *int64,
+	initialRewardAmount *float64, // ← добавили
 ) (int64, error) {
 	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
 	defer cancel()
@@ -253,11 +254,16 @@ func (s *DepositService) CreateDepositByAdmin(
 		return 0, err
 	}
 
+	rewardAmount := 0.0
+	if initialRewardAmount != nil {
+		rewardAmount = *initialRewardAmount
+	}
+
 	reward := &reward_model.Reward{
 		UserID:    userID,
 		DepositID: &deposit.ID,
 		Type:      "deposit",
-		Amount:    amount,
+		Amount:    rewardAmount,
 		Withdrawn: 0,
 		CreatedAt: time.Now(),
 	}
@@ -282,4 +288,16 @@ func (s *DepositService) GetTotalApprovedAmount(ctx context.Context) (float64, e
 	defer cancel()
 
 	return s.repo.GetTotalApprovedAmount(ctx)
+}
+
+func (s *DepositService) GetAllApprovedDeposits(ctx context.Context) ([]*model.Deposit, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+	return s.repo.FindAllApproved(ctx)
+}
+
+func (s *DepositService) GetApprovedDepositsByUserID(ctx context.Context, userID int64) ([]*model.Deposit, error) {
+	ctx, cancel := ctxutil.WithTimeout(ctx, 2)
+	defer cancel()
+	return s.repo.FindApprovedByUserID(ctx, userID)
 }

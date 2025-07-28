@@ -156,3 +156,41 @@ func (r *RewardRepository) GetTotalAvailableAmount(ctx context.Context) (float64
 	}
 	return total, nil
 }
+
+func (r *RewardRepository) FindByDepositIDs(ctx context.Context, depositIDs []int64) ([]*model.Reward, error) {
+	if len(depositIDs) == 0 {
+		return []*model.Reward{}, nil
+	}
+
+	query := `
+		SELECT id, user_id, deposit_id, type, amount, withdrawn, last_accrued_at, created_at
+		FROM rewards
+		WHERE deposit_id = ANY($1)
+	`
+
+	rows, err := r.querier.Query(ctx, query, depositIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rewards []*model.Reward
+	for rows.Next() {
+		var rw model.Reward
+		if err := rows.Scan(
+			&rw.ID,
+			&rw.UserID,
+			&rw.DepositID,
+			&rw.Type,
+			&rw.Amount,
+			&rw.Withdrawn,
+			&rw.LastAccruedAt,
+			&rw.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, &rw)
+	}
+
+	return rewards, nil
+}
