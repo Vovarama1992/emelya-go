@@ -72,8 +72,8 @@ func main() {
 	withdrawalRepo := withdrawalinfra.NewWithdrawalRepository(dbConn)
 	tarifRepo := tariffinfra.NewTariffRepository(dbConn)
 
-	rewardService := usecase.NewRewardService(rewardRepo)
 	tariffService := usecase.NewTariffService(tarifRepo)
+	rewardService := usecase.NewRewardService(rewardRepo, depositRepo)
 	depositService := usecase.NewDepositService(depositRepo, rewardService, tariffService, dbConn, notifierService)
 	withdrawalService := usecase.NewWithdrawalService(withdrawalRepo, rewardService, dbConn, notifierService)
 	operationService := usecase.NewOperationsService(depositService, rewardService, withdrawalService)

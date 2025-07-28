@@ -15,17 +15,17 @@ var (
 )
 
 type RewardService struct {
-	repo           ports.RewardRepository
-	depositService ports.DepositService
+	repo        ports.RewardRepository
+	depositRepo ports.DepositRepository
 }
 
 func NewRewardService(
 	repo ports.RewardRepository,
-	depositService ports.DepositService,
+	depositRepo ports.DepositRepository,
 ) *RewardService {
 	return &RewardService{
-		repo:           repo,
-		depositService: depositService,
+		repo:        repo,
+		depositRepo: depositRepo,
 	}
 }
 
@@ -62,7 +62,7 @@ func (s *RewardService) AccrueDailyRewardForDeposit(ctx context.Context, deposit
 		return err
 	}
 
-	deposit, err := s.depositService.GetDepositByID(ctx, depositID)
+	deposit, err := s.depositRepo.FindByID(ctx, depositID)
 	if err != nil {
 		return err
 	}
