@@ -54,16 +54,16 @@ func main() {
 
 	ctx := context.Background()
 
-	// Полная очистка таблиц (в правильном порядке из-за FK)
-	log.Println("Очищаем таблицы deposits и users...")
-	if _, err := db.ExecContext(ctx, `DELETE FROM deposits`); err != nil {
+	// Полная очистка с обнулением последовательностей
+	log.Println("Полная очистка таблиц deposits и users...")
+	if _, err := db.ExecContext(ctx, `TRUNCATE deposits RESTART IDENTITY CASCADE`); err != nil {
 		log.Fatalf("Ошибка очистки deposits: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, `DELETE FROM users`); err != nil {
+	if _, err := db.ExecContext(ctx, `TRUNCATE users RESTART IDENTITY CASCADE`); err != nil {
 		log.Fatalf("Ошибка очистки users: %v", err)
 	}
 
-	// Читаем JSON с пользователями
+	// Читаем JSON
 	file, err := os.Open("scripts/users_from_dump.json")
 	if err != nil {
 		log.Fatalf("Не удалось открыть users_from_dump.json: %v", err)
