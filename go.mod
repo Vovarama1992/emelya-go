@@ -1,6 +1,6 @@
 module github.com/Vovarama1992/emelya-go
 
-go 1.23.0
+go 1.23
 
 require (
 	github.com/Vovarama1992/go-utils v0.0.0-20250724110426-34d015d6bdfd
