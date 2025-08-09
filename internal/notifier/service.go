@@ -3,12 +3,14 @@ package notifier
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
+	"net"
 	"net/http"
+	"net/smtp"
 	"os"
 	"strings"
 	"time"
@@ -19,8 +21,6 @@ type Notifier struct {
 	smsApiKey    string
 	smsSender    string
 	smsApiURL    string
-	emailApiKey  string
-	emailApiURL  string
 	smtpHost     string
 	smtpPort     int
 	smtpUser     string
@@ -30,7 +30,8 @@ type Notifier struct {
 }
 
 func NewNotifier() *Notifier {
-	smtpPort := 465
+	// По умолчанию используем 587 (STARTTLS)
+	smtpPort := 587
 	if val := os.Getenv("SMTP_PORT"); val != "" {
 		fmt.Sscanf(val, "%d", &smtpPort)
 	}
@@ -45,8 +46,6 @@ func NewNotifier() *Notifier {
 		smsApiKey:    os.Getenv("SMS_API_KEY"),
 		smsSender:    os.Getenv("SMS_SENDER_NAME"),
 		smsApiURL:    os.Getenv("REDSMS_API_URL"),
-		emailApiKey:  os.Getenv("EMAIL_API_KEY"),
-		emailApiURL:  os.Getenv("EMAIL_API_URL"),
 		smtpHost:     os.Getenv("SMTP_HOST"),
 		smtpPort:     smtpPort,
 		smtpUser:     os.Getenv("SMTP_USER"),
@@ -105,52 +104,100 @@ func (n *Notifier) sendSms(phone string, text string) error {
 }
 
 func (n *Notifier) SendEmailToOperator(subject, body string) error {
-	log.Println("[NOTIFIER] Начало отправки email оператору")
-
-	type EmailRequest struct {
-		FromEmail string `json:"from_email"`
-		Subject   string `json:"subject"`
-		Text      string `json:"text"`
-		To        string `json:"to"`
+	if n.smtpHost == "" || n.smtpUser == "" || n.smtpPass == "" || n.smtpFrom == "" || n.smtpPort == 0 {
+		return fmt.Errorf("[NOTIFIER] SMTP env не заданы (SMTP_HOST/PORT/USER/PASS/FROM)")
 	}
 
-	client := &http.Client{}
+	log.Println("[NOTIFIER] Отправка email через SMTP (STARTTLS)")
+
+	// Общие заголовки (персонализируем To в цикле)
+	baseHeaders := map[string]string{
+		"From":         n.smtpFrom,
+		"Subject":      subject,
+		"MIME-Version": "1.0",
+		"Content-Type": "text/plain; charset=UTF-8",
+	}
+
+	addr := fmt.Sprintf("%s:%d", n.smtpHost, n.smtpPort)
+	tlsCfg := &tls.Config{ServerName: n.smtpHost}
+
 	for _, to := range n.emailTargets {
-		reqBody := EmailRequest{
-			FromEmail: n.smtpFrom,
-			Subject:   subject,
-			Text:      body,
-			To:        strings.TrimSpace(to),
+		to = strings.TrimSpace(to)
+		if to == "" {
+			continue
 		}
 
-		jsonData, err := json.Marshal(reqBody)
+		// Формируем письмо
+		var sb strings.Builder
+		for k, v := range baseHeaders {
+			sb.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
+		}
+		sb.WriteString(fmt.Sprintf("To: %s\r\n", to))
+		sb.WriteString("\r\n")
+		sb.WriteString(body)
+		msg := []byte(sb.String())
+
+		// SMTP-клиент с явным STARTTLS
+		conn, err := net.Dial("tcp", addr)
 		if err != nil {
-			log.Printf("[NOTIFIER: EMAIL] Ошибка маршалинга JSON: %v", err)
-			return err
+			return fmt.Errorf("[NOTIFIER] SMTP dial: %w", err)
 		}
 
-		req, err := http.NewRequest("POST", n.emailApiURL, bytes.NewBuffer(jsonData))
+		c, err := smtp.NewClient(conn, n.smtpHost)
 		if err != nil {
-			log.Printf("[NOTIFIER: EMAIL] Ошибка создания запроса: %v", err)
-			return err
+			_ = conn.Close()
+			return fmt.Errorf("[NOTIFIER] SMTP new client: %w", err)
 		}
-		req.Header.Set("Authorization", "Bearer "+n.emailApiKey)
-		req.Header.Set("Content-Type", "application/json")
 
-		resp, err := client.Do(req)
+		// EHLO и STARTTLS
+		if ok, _ := c.Extension("STARTTLS"); ok {
+			if err := c.StartTLS(tlsCfg); err != nil {
+				_ = c.Close()
+				return fmt.Errorf("[NOTIFIER] STARTTLS: %w", err)
+			}
+		}
+
+		// AUTH
+		auth := smtp.PlainAuth("", n.smtpUser, n.smtpPass, n.smtpHost)
+		if ok, _ := c.Extension("AUTH"); ok {
+			if err := c.Auth(auth); err != nil {
+				_ = c.Close()
+				return fmt.Errorf("[NOTIFIER] SMTP auth: %w", err)
+			}
+		}
+
+		// Envelope: обычно лучше использовать smtpUser как envelope-from
+		if err := c.Mail(n.smtpUser); err != nil {
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] MAIL FROM: %w", err)
+		}
+		if err := c.Rcpt(to); err != nil {
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] RCPT TO (%s): %w", to, err)
+		}
+
+		w, err := c.Data()
 		if err != nil {
-			log.Printf("[NOTIFIER: EMAIL] Ошибка отправки запроса: %v", err)
-			return err
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] DATA open: %w", err)
 		}
-		defer resp.Body.Close()
+		if _, err := w.Write(msg); err != nil {
+			_ = w.Close()
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] DATA write: %w", err)
+		}
+		if err := w.Close(); err != nil {
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] DATA close: %w", err)
+		}
 
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-			bodyBytes, _ := io.ReadAll(resp.Body)
-			log.Printf("[NOTIFIER: EMAIL] Ошибка ответа API: %s", string(bodyBytes))
-			return fmt.Errorf("не удалось отправить email, статус: %s", resp.Status)
+		if err := c.Quit(); err != nil {
+			_ = c.Close()
+			return fmt.Errorf("[NOTIFIER] SMTP quit: %w", err)
 		}
+
+		log.Printf("[NOTIFIER] Email отправлен: %s\n", to)
 	}
 
-	log.Println("[NOTIFIER] Email успешно отправлен операторам через RedSMS API.")
 	return nil
 }
