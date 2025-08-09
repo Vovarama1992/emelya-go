@@ -104,15 +104,27 @@ func (n *Notifier) sendSms(phone string, text string) error {
 }
 
 func (n *Notifier) SendEmailToOperator(subject, body string) error {
-	if n.smtpHost == "" || n.smtpUser == "" || n.smtpPass == "" || n.smtpFrom == "" || n.smtpPort == 0 {
-		return fmt.Errorf("[NOTIFIER] SMTP env не заданы (SMTP_HOST/PORT/USER/PASS/FROM)")
+	if n.smtpHost == "" || n.smtpUser == "" || n.smtpPass == "" || n.smtpPort == 0 {
+		return fmt.Errorf("[NOTIFIER] SMTP env не заданы (SMTP_HOST/PORT/USER/PASS)")
 	}
 
 	log.Println("[NOTIFIER] Отправка email через SMTP (STARTTLS)")
 
-	// Общие заголовки (персонализируем To в цикле)
+	tryFrom := "no-reply@emelia-invest.com"
+	if err := n.sendEmailsWithFrom(tryFrom, subject, body); err != nil {
+		log.Printf("[NOTIFIER] Не удалось отправить от имени %s: %v. Пробуем из ENV...", tryFrom, err)
+		if n.smtpFrom == "" {
+			return fmt.Errorf("[NOTIFIER] SMTP_FROM не задан для fallback")
+		}
+		return n.sendEmailsWithFrom(n.smtpFrom, subject, body)
+	}
+	return nil
+}
+
+// sendEmailsWithFrom — выделенная функция, чтобы не дублировать код отправки
+func (n *Notifier) sendEmailsWithFrom(from string, subject, body string) error {
 	baseHeaders := map[string]string{
-		"From":         n.smtpFrom,
+		"From":         from,
 		"Subject":      subject,
 		"MIME-Version": "1.0",
 		"Content-Type": "text/plain; charset=UTF-8",
@@ -127,7 +139,6 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 			continue
 		}
 
-		// Формируем письмо
 		var sb strings.Builder
 		for k, v := range baseHeaders {
 			sb.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
@@ -137,7 +148,6 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 		sb.WriteString(body)
 		msg := []byte(sb.String())
 
-		// SMTP-клиент с явным STARTTLS
 		conn, err := net.Dial("tcp", addr)
 		if err != nil {
 			return fmt.Errorf("[NOTIFIER] SMTP dial: %w", err)
@@ -149,7 +159,6 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 			return fmt.Errorf("[NOTIFIER] SMTP new client: %w", err)
 		}
 
-		// EHLO и STARTTLS
 		if ok, _ := c.Extension("STARTTLS"); ok {
 			if err := c.StartTLS(tlsCfg); err != nil {
 				_ = c.Close()
@@ -157,7 +166,6 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 			}
 		}
 
-		// AUTH
 		auth := smtp.PlainAuth("", n.smtpUser, n.smtpPass, n.smtpHost)
 		if ok, _ := c.Extension("AUTH"); ok {
 			if err := c.Auth(auth); err != nil {
@@ -166,7 +174,7 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 			}
 		}
 
-		// Envelope: обычно лучше использовать smtpUser как envelope-from
+		// envelope-from можно оставить как smtpUser — так безопаснее для SPF
 		if err := c.Mail(n.smtpUser); err != nil {
 			_ = c.Close()
 			return fmt.Errorf("[NOTIFIER] MAIL FROM: %w", err)
@@ -196,8 +204,7 @@ func (n *Notifier) SendEmailToOperator(subject, body string) error {
 			return fmt.Errorf("[NOTIFIER] SMTP quit: %w", err)
 		}
 
-		log.Printf("[NOTIFIER] Email отправлен: %s\n", to)
+		log.Printf("[NOTIFIER] Email отправлен от %s: %s\n", from, to)
 	}
-
 	return nil
 }
