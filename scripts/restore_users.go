@@ -52,15 +52,18 @@ func main() {
 	}
 	defer db.Close()
 
-	// Очистка таблиц
-	if _, err := db.Exec(`DELETE FROM deposits`); err != nil {
+	ctx := context.Background()
+
+	// Полная очистка таблиц (в правильном порядке из-за FK)
+	log.Println("Очищаем таблицы deposits и users...")
+	if _, err := db.ExecContext(ctx, `DELETE FROM deposits`); err != nil {
 		log.Fatalf("Ошибка очистки deposits: %v", err)
 	}
-	if _, err := db.Exec(`DELETE FROM users`); err != nil {
+	if _, err := db.ExecContext(ctx, `DELETE FROM users`); err != nil {
 		log.Fatalf("Ошибка очистки users: %v", err)
 	}
 
-	// Чтение файла
+	// Читаем JSON с пользователями
 	file, err := os.Open("scripts/users_from_dump.json")
 	if err != nil {
 		log.Fatalf("Не удалось открыть users_from_dump.json: %v", err)
@@ -72,7 +75,7 @@ func main() {
 		log.Fatalf("Ошибка парсинга JSON: %v", err)
 	}
 
-	// Парсинг баланса
+	// Парсим баланс
 	for i := range users {
 		var f float64
 		if err := json.Unmarshal(users[i].BalanceRaw, &f); err != nil {
@@ -83,8 +86,6 @@ func main() {
 		}
 		users[i].Balance = f
 	}
-
-	ctx := context.Background()
 
 	insertUserStmt, err := db.PrepareNamed(`
 		INSERT INTO users (
@@ -105,20 +106,6 @@ func main() {
 	defer insertUserStmt.Close()
 
 	for _, u := range users {
-		// если такой email уже есть — удалим старую запись
-		var exists bool
-		err := db.GetContext(ctx, &exists, `SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`, u.Email)
-		if err != nil {
-			log.Fatalf("Ошибка при проверке email %s: %v", u.Email, err)
-		}
-		if exists {
-			_, err := db.ExecContext(ctx, `DELETE FROM users WHERE email = $1`, u.Email)
-			if err != nil {
-				log.Fatalf("Не удалось удалить дубликат email %s: %v", u.Email, err)
-			}
-			fmt.Printf("Старый пользователь с email %s удалён\n", u.Email)
-		}
-
 		params := map[string]interface{}{
 			"id":                u.ID,
 			"first_name":        u.FirstName,
@@ -142,8 +129,8 @@ func main() {
 			_, err := db.ExecContext(ctx, `
 				INSERT INTO deposits (
 					user_id, amount, created_at, approved_at,
-					block_until, daily_reward, status
-				) VALUES ($1, $2, now(), now(), NULL, NULL, 'approved')
+					daily_reward, status, block_days
+				) VALUES ($1, $2, now(), now(), NULL, 'approved', NULL)
 			`, insertedID, u.Balance)
 			if err != nil {
 				log.Fatalf("Ошибка создания депозита для пользователя %d: %v", insertedID, err)
@@ -153,7 +140,7 @@ func main() {
 		fmt.Printf("Пользователь %s вставлен с id %d\n", u.Email, insertedID)
 	}
 
-	// Обновление referrer_id
+	// Обновляем рефералов
 	for _, u := range users {
 		if u.ReferrerID != nil {
 			ref := int64(*u.ReferrerID)
